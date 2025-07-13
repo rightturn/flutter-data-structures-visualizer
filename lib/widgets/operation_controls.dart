@@ -1,10 +1,14 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../models/data_structure.dart';
+import '../models/base_data_structure.dart';
+import '../models/data_structure_info.dart';
+import '../data_structures/array_data_structure.dart';
+import '../utils/constants.dart';
+import '../utils/logger.dart';
 
 class OperationControls extends StatefulWidget {
-  final DataStructure dataStructure;
+  final BaseDataStructure dataStructure;
   final DataStructureInfo dataStructureInfo;
   final VoidCallback onOperationPerformed;
   final Function(int)? onNodeHighlighted;
@@ -37,50 +41,57 @@ class _OperationControlsState extends State<OperationControls> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final operations = widget.dataStructureInfo.operations;
-    final isArray = widget.dataStructureInfo.type.toString().contains('array');
+    final isArray = widget.dataStructureInfo.type == DataStructureType.array;
 
     return Container(
       padding: const EdgeInsets.all(16),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Operations',
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               // Only show dropdown for non-array data structures
               if (!isArray)
-                DropdownButtonFormField<String>(
-                  value: _selectedOperation,
-                  decoration: InputDecoration(
-                    labelText: 'Select Operation',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                SizedBox(
+                  width: double.infinity,
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedOperation,
+                    decoration: InputDecoration(
+                      labelText: 'Select Operation',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.settings,
+                        color: widget.dataStructureInfo.color,
+                      ),
                     ),
-                    prefixIcon: Icon(
-                      Icons.settings,
-                      color: widget.dataStructureInfo.color,
-                    ),
+                    items: operations.map((operation) {
+                      return DropdownMenuItem(
+                        value: operation,
+                        child: Text(
+                          operation,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedOperation = value;
+                      });
+                    },
                   ),
-                  items: operations.map((operation) {
-                    return DropdownMenuItem(
-                      value: operation,
-                      child: Text(operation),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedOperation = value;
-                    });
-                  },
                 ),
-              if (!isArray) const SizedBox(height: 16),
+              if (!isArray) const SizedBox(height: 12),
               // Value input (for operations that need a value)
               if (_selectedOperation != null && _needsValue(_selectedOperation!) && !isArray)
                 TextFormField(
@@ -100,7 +111,7 @@ class _OperationControlsState extends State<OperationControls> {
                     FilteringTextInputFormatter.digitsOnly,
                   ],
                 ),
-              if (!isArray) const SizedBox(height: 16),
+              if (!isArray) const SizedBox(height: 12),
               // Execute button (for non-array)
               if (_selectedOperation != null && !isArray)
                 SizedBox(
@@ -117,18 +128,18 @@ class _OperationControlsState extends State<OperationControls> {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: widget.dataStructureInfo.color,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
                 ),
-              if (!isArray) const SizedBox(height: 16),
+              if (!isArray) const SizedBox(height: 12),
               // Quick operation buttons (always show for array)
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 6,
+                runSpacing: 6,
                 children: operations.map((operation) {
                   return ActionChip(
                     label: Text(operation),
@@ -145,8 +156,8 @@ class _OperationControlsState extends State<OperationControls> {
                             widget.dataStructure.traverse();
                             final nodes = widget.dataStructure.nodes;
                             final steps = widget.dataStructure.animationSteps.length;
-                            debugPrint('Traverse: nodes=${nodes.map((n) => n.value).toList()}');
-                            debugPrint('Traverse: steps=$steps');
+                            AppLogger.operation('Traverse: nodes=${nodes.map((n) => n.value).toList()}');
+                            AppLogger.operation('Traverse: steps=$steps');
                             
                             // Set to step 0 and update UI
                             setState(() {
@@ -159,27 +170,27 @@ class _OperationControlsState extends State<OperationControls> {
                               widget.onAnimationStateChanged!(true);
                             }
                           } else if (operation == 'Search') {
-                            debugPrint('Search operation selected, showing dialog');
+                            AppLogger.operation('Search operation selected, showing dialog');
                             setState(() {
                               _selectedOperation = operation;
                             });
-                            debugPrint('_selectedOperation set to: $_selectedOperation');
+                            AppLogger.operation('_selectedOperation set to: $_selectedOperation');
                             // Show dialog for search value
                             _showValueDialog(operation);
                           } else if (operation == 'Insert') {
-                            debugPrint('Insert operation selected, showing dialog');
+                            AppLogger.operation('Insert operation selected, showing dialog');
                             setState(() {
                               _selectedOperation = operation;
                             });
-                            debugPrint('_selectedOperation set to: $_selectedOperation');
+                            AppLogger.operation('_selectedOperation set to: $_selectedOperation');
                             // Show dialog for insert value
                             _showValueDialog(operation);
                           } else if (operation == 'Delete') {
-                            debugPrint('Delete operation selected, showing dialog');
+                            AppLogger.operation('Delete operation selected, showing dialog');
                             setState(() {
                               _selectedOperation = operation;
                             });
-                            debugPrint('_selectedOperation set to: $_selectedOperation');
+                            AppLogger.operation('_selectedOperation set to: $_selectedOperation');
                             // Show dialog for delete value
                             _showValueDialog(operation);
                           } else {
@@ -198,61 +209,33 @@ class _OperationControlsState extends State<OperationControls> {
                         setState(() {
                           _selectedOperation = operation;
                         });
-                        if (!_needsValue(operation)) {
-                          _executeOperation();
-                        } else {
-                          _showValueDialog(operation);
-                        }
+                        _executeOperation();
                       }
                     },
-                    backgroundColor: widget.dataStructureInfo.color.withOpacity(0.1),
-                    side: BorderSide(
-                      color: widget.dataStructureInfo.color.withOpacity(0.3),
-                    ),
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 16),
-              // Random data generation
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _generateRandomData,
-                      icon: Icon(
-                        Icons.shuffle,
-                        color: widget.dataStructureInfo.color,
-                      ),
-                      label: Text(
-                        'Generate Random Data',
-                        style: TextStyle(
-                          color: widget.dataStructureInfo.color,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: widget.dataStructureInfo.color),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: _clearData,
-                    icon: Icon(
-                      Icons.clear,
-                      color: Colors.red,
-                    ),
+              const SizedBox(height: 12),
+              // Generate Data button (for array)
+              if (isArray)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _showGenerateRandomDialog,
+                    icon: const Icon(Icons.shuffle, color: Colors.white),
                     label: const Text(
-                      'Clear',
-                      style: TextStyle(color: Colors.red),
+                      'Generate Random Data',
+                      style: TextStyle(color: Colors.white),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: widget.dataStructureInfo.color,
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
             ],
           ),
         ),
@@ -260,40 +243,8 @@ class _OperationControlsState extends State<OperationControls> {
     );
   }
 
-  void _showValueDialog(String operation) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Enter value for $operation'),
-          content: TextField(
-            controller: _valueController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Value'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                debugPrint('Dialog OK pressed, selected operation: $_selectedOperation');
-                Navigator.of(context).pop();
-                _executeOperation();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   bool _needsValue(String operation) {
-    return ['Push', 'Enqueue', 'Add Vertex', 'Add Edge'].contains(operation);
+    return ['Insert', 'Delete', 'Search', 'Push', 'Enqueue'].contains(operation);
   }
 
   IconData _getOperationIcon(String? operation) {
@@ -301,212 +252,109 @@ class _OperationControlsState extends State<OperationControls> {
       case 'Insert':
       case 'Push':
       case 'Enqueue':
-      case 'Add Vertex':
-      case 'Add Edge':
         return Icons.add;
       case 'Delete':
       case 'Pop':
       case 'Dequeue':
         return Icons.remove;
       case 'Search':
-        return Icons.search;
-      case 'Traverse':
-      case 'DFS':
-      case 'BFS':
-        return Icons.explore;
       case 'Peek':
       case 'Front':
-        return Icons.visibility;
+        return Icons.search;
+      case 'Traverse':
+        return Icons.list;
       case 'IsEmpty':
-        return Icons.check_circle;
-      case 'Extract Min':
-      case 'Extract Max':
-        return Icons.vertical_align_bottom;
-      case 'Heapify':
-      case 'Build Heap':
-        return Icons.build;
+        return Icons.check_box_outline_blank;
       default:
-        return Icons.play_arrow;
+        return Icons.settings;
     }
   }
 
-  void _executeOperation() async {
-    debugPrint('_executeOperation called');
-    if (_selectedOperation == null) {
-      debugPrint('_selectedOperation is null, returning');
+  void _executeOperation() {
+    if (_selectedOperation == null) return;
+
+    final value = _needsValue(_selectedOperation!) && _valueController.text.isNotEmpty
+        ? int.tryParse(_valueController.text)
+        : null;
+
+    if (_needsValue(_selectedOperation!) && value == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid number'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
-    debugPrint('Executing operation: $_selectedOperation');
-    debugPrint('Value controller text: ${_valueController.text}');
+    AppLogger.operation('Executing $_selectedOperation with value: $value');
 
-    try {
-      switch (_selectedOperation!) {
-        case 'Insert':
-          final value = int.tryParse(_valueController.text);
-          debugPrint('Insert case reached with value: $value');
-          if (value != null) {
-            debugPrint('Insert: starting insert for value: $value');
-            widget.dataStructure.insert(value);
-            final nodes = widget.dataStructure.nodes;
-            final steps = widget.dataStructure.animationSteps.length;
-            debugPrint('Insert: nodes=${nodes.map((n) => n.value).toList()}');
-            debugPrint('Insert: steps=$steps');
-            
-            // Set to step 0 and update UI
-            setState(() {
-              widget.dataStructure.goToStep(0);
-            });
-            widget.onOperationPerformed();
-            
-            // Notify parent to start animation
-            if (widget.onAnimationStateChanged != null) {
-              widget.onAnimationStateChanged!(true);
-            }
-            
-            _valueController.clear();
-          }
-          break;
-        case 'Push':
-        case 'Enqueue':
-        case 'Add Vertex':
-          final value = int.tryParse(_valueController.text);
-          debugPrint('Parsed value: $value');
-          if (value != null) {
-            debugPrint('Calling insert with value: $value');
-            widget.dataStructure.insert(value);
-            debugPrint('Insert completed. Nodes count: ${widget.dataStructure.nodes.length}');
-            _valueController.clear();
-          }
-          break;
-        case 'Delete':
-          final value = int.tryParse(_valueController.text);
-          debugPrint('Delete case reached with value: $value');
-          if (value != null) {
-            debugPrint('Delete: starting delete for value: $value');
-            widget.dataStructure.delete(value);
-            final nodes = widget.dataStructure.nodes;
-            final steps = widget.dataStructure.animationSteps.length;
-            debugPrint('Delete: nodes=${nodes.map((n) => n.value).toList()}');
-            debugPrint('Delete: steps=$steps');
-            
-            // Set to step 0 and update UI
-            setState(() {
-              widget.dataStructure.goToStep(0);
-            });
-            widget.onOperationPerformed();
-            
-            // Notify parent to start animation
-            if (widget.onAnimationStateChanged != null) {
-              widget.onAnimationStateChanged!(true);
-            }
-            
-            _valueController.clear();
-          }
-          break;
-        case 'Pop':
-        case 'Dequeue':
-          if (_needsValue(_selectedOperation!)) {
-            final value = int.tryParse(_valueController.text);
-            if (value != null) {
-              widget.dataStructure.delete(value);
-              _valueController.clear();
-            }
-          } else {
-            widget.dataStructure.delete(0); // For operations that don't need a value
-          }
-          break;
-        case 'Search':
-          final value = int.tryParse(_valueController.text);
-          debugPrint('Search case reached with value: $value');
-          if (value != null) {
-            debugPrint('Search: starting search for value: $value');
-            widget.dataStructure.search(value);
-            final nodes = widget.dataStructure.nodes;
-            final steps = widget.dataStructure.animationSteps.length;
-            debugPrint('Search: nodes=${nodes.map((n) => n.value).toList()}');
-            debugPrint('Search: steps=$steps');
-            
-            // Set to step 0 and update UI
-            setState(() {
-              widget.dataStructure.goToStep(0);
-            });
-            widget.onOperationPerformed();
-            
-            // Notify parent to start animation
-            if (widget.onAnimationStateChanged != null) {
-              widget.onAnimationStateChanged!(true);
-            }
-            
-            _valueController.clear();
-          }
-          break;
-        case 'Traverse':
-        case 'DFS':
-        case 'BFS':
-        case 'Peek':
-        case 'Front':
-        case 'IsEmpty':
-        case 'Extract Min':
-        case 'Extract Max':
-        case 'Heapify':
-        case 'Build Heap':
-          widget.dataStructure.traverse();
-          final steps = widget.dataStructure.animationSteps.length;
-          for (int i = 0; i < steps; i++) {
-            if (!mounted) return;
-            setState(() {
-              widget.dataStructure.goToStep(i);
-            });
-            widget.onOperationPerformed();
-            await Future.delayed(const Duration(milliseconds: 500));
-          }
-          return;
-      }
-      widget.onOperationPerformed();
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${_selectedOperation!} operation completed'),
-          backgroundColor: widget.dataStructureInfo.color,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } catch (e) {
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+    switch (_selectedOperation) {
+      case 'Insert':
+      case 'Push':
+      case 'Enqueue':
+        if (value != null) {
+          widget.dataStructure.insert(value);
+        }
+        break;
+      case 'Delete':
+      case 'Pop':
+      case 'Dequeue':
+        if (value != null) {
+          widget.dataStructure.delete(value);
+        } else {
+          widget.dataStructure.delete(0); // For operations that don't need a value
+        }
+        break;
+      case 'Search':
+      case 'Peek':
+      case 'Front':
+        if (value != null) {
+          widget.dataStructure.search(value);
+        } else {
+          widget.dataStructure.search(0); // For operations that don't need a value
+        }
+        break;
+      case 'Traverse':
+        widget.dataStructure.traverse();
+        break;
+      case 'IsEmpty':
+        // This would need to be implemented in the data structure
+        break;
     }
+
+    // Clear the input
+    _valueController.clear();
+    _selectedOperation = null;
+
+    // Notify parent
+    widget.onOperationPerformed();
   }
 
-  void _generateRandomData() {
-    // Show dialog to ask user how many numbers to generate
+  void _showValueDialog(String operation) {
+    final controller = TextEditingController();
+    
     showDialog(
       context: context,
       builder: (context) {
-        final countController = TextEditingController(text: '8'); // Default value
         return AlertDialog(
-          title: const Text('Generate Random Data'),
+          title: Text('$operation Value'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('How many random numbers do you want to generate?'),
+              Text('Enter a value to $operation:'),
               const SizedBox(height: 16),
               TextField(
-                controller: countController,
+                controller: controller,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Count (1-50)',
-                  hintText: 'Enter a number between 1 and 50',
+                  labelText: 'Value',
+                  hintText: 'Enter a number',
                 ),
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                 ],
+                autofocus: true,
               ),
             ],
           ),
@@ -519,17 +367,94 @@ class _OperationControlsState extends State<OperationControls> {
             ),
             ElevatedButton(
               onPressed: () {
-                final count = int.tryParse(countController.text);
-                if (count != null && count >= 1 && count <= 50) {
+                final value = int.tryParse(controller.text);
+                if (value != null) {
                   Navigator.of(context).pop();
-                  _generateRandomNumbers(count);
+                  
+                  // Execute the operation
+                  switch (operation) {
+                    case 'Insert':
+                      widget.dataStructure.insert(value);
+                      break;
+                    case 'Delete':
+                      widget.dataStructure.delete(value);
+                      break;
+                    case 'Search':
+                      widget.dataStructure.search(value);
+                      break;
+                  }
+                  
+                  // Set to step 0 and update UI
+                  setState(() {
+                    widget.dataStructure.goToStep(0);
+                  });
+                  widget.onOperationPerformed();
+                  
+                  // Notify parent to start animation
+                  if (widget.onAnimationStateChanged != null) {
+                    widget.onAnimationStateChanged!(true);
+                  }
                 } else {
-                  // Show error for invalid input
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter a number between 1 and 50'),
+                      content: Text('Please enter a valid number'),
                       backgroundColor: Colors.red,
-                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Execute'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showGenerateRandomDialog() {
+    final controller = TextEditingController(text: '8');
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Generate Random Data'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Enter the number of items to generate:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Number of items',
+                  hintText: 'e.g. 8',
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                autofocus: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final count = int.tryParse(controller.text);
+                if (count != null && count > 0) {
+                  Navigator.of(context).pop();
+                  _generateRandomData(count);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid number'),
+                      backgroundColor: Colors.red,
                     ),
                   );
                 }
@@ -542,47 +467,13 @@ class _OperationControlsState extends State<OperationControls> {
     );
   }
 
-  void _generateRandomNumbers(int count) {
-    // Generate random numbers between 1 and 100
-    final randomGenerator = Random();
-    final random = List.generate(count, (index) {
-      return 1 + randomGenerator.nextInt(100); // Random number between 1 and 100
-    });
-    
-    debugPrint('Generated $count random numbers: $random');
-    
-    // Use the new method to add nodes directly without animation
+  void _generateRandomData(int count) {
+    final random = Random();
+    final values = List.generate(count, (_) => random.nextInt(100));
+    AppLogger.operation('Generated $count random numbers: $values');
     if (widget.dataStructure is ArrayDataStructure) {
-      (widget.dataStructure as ArrayDataStructure).addNodesDirectly(random);
-    } else {
-      // Fallback for other data structures
-      widget.dataStructure.reset();
-      for (final value in random) {
-        widget.dataStructure.insert(value);
-      }
+      (widget.dataStructure as ArrayDataStructure).addNodesDirectly(values);
+      widget.onOperationPerformed();
     }
-    
-    widget.onOperationPerformed();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Generated $count random numbers'),
-        backgroundColor: widget.dataStructureInfo.color,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _clearData() {
-    widget.dataStructure.reset();
-    widget.onOperationPerformed();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Data cleared'),
-        backgroundColor: Colors.orange,
-        duration: Duration(seconds: 2),
-      ),
-    );
   }
 } 
