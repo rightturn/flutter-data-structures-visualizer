@@ -65,6 +65,7 @@ class AnimationService {
   }
 
   void dispose() {
+    _isPlaying = false;
     _animationTimer?.cancel();
   }
 } 

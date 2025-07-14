@@ -9,6 +9,8 @@ class DataStructureNode {
   final DataStructureNode? next;
   final DataStructureNode? prev;
 
+  static const _unset = Object();
+
   DataStructureNode({
     required this.value,
     this.label,
@@ -21,21 +23,23 @@ class DataStructureNode {
 
   DataStructureNode copyWith({
     int? value,
-    String? label,
-    Color? color,
+    Object? label = _unset,
+    Object? color = _unset,
     Offset? position,
-    List<DataStructureNode>? children,
-    DataStructureNode? next,
-    DataStructureNode? prev,
+    Object? children = _unset,
+    Object? next = _unset,
+    Object? prev = _unset,
   }) {
     return DataStructureNode(
       value: value ?? this.value,
-      label: label ?? this.label,
-      color: color ?? this.color,
+      label: label == _unset ? this.label : label as String?,
+      color: color == _unset ? this.color : color as Color?,
       position: position ?? this.position,
-      children: children ?? this.children,
-      next: next ?? this.next,
-      prev: prev ?? this.prev,
+      children: children == _unset
+        ? this.children
+        : (children == null ? <DataStructureNode>[] : children as List<DataStructureNode>),
+      next: next == _unset ? this.next : next as DataStructureNode?,
+      prev: prev == _unset ? this.prev : prev as DataStructureNode?,
     );
   }
 } 
