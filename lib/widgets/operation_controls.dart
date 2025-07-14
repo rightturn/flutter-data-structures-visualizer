@@ -13,6 +13,8 @@ class OperationControls extends StatefulWidget {
   final VoidCallback onOperationPerformed;
   final Function(int)? onNodeHighlighted;
   final Function(bool)? onAnimationStateChanged;
+  final VoidCallback? onShowProgress; // new callback
+  final VoidCallback? onHideProgress; // new callback
 
   const OperationControls({
     super.key,
@@ -21,6 +23,8 @@ class OperationControls extends StatefulWidget {
     required this.onOperationPerformed,
     this.onNodeHighlighted,
     this.onAnimationStateChanged,
+    this.onShowProgress,
+    this.onHideProgress,
   });
 
   @override
@@ -48,195 +52,197 @@ class _OperationControlsState extends State<OperationControls> {
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Operations',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Operations',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              // Only show dropdown for non-array data structures
-              if (!isArray)
-                SizedBox(
-                  width: double.infinity,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedOperation,
+                const SizedBox(height: 12),
+                // Only show dropdown for non-array data structures
+                if (!isArray)
+                  SizedBox(
+                    width: double.infinity,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedOperation,
+                      decoration: InputDecoration(
+                        labelText: 'Select Operation',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.settings,
+                          color: widget.dataStructureInfo.color,
+                        ),
+                      ),
+                      items: operations.map((operation) {
+                        return DropdownMenuItem(
+                          value: operation,
+                          child: Text(
+                            operation,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedOperation = value;
+                        });
+                      },
+                    ),
+                  ),
+                if (!isArray) const SizedBox(height: 12),
+                // Value input (for operations that need a value)
+                if (_selectedOperation != null && _needsValue(_selectedOperation!) && !isArray)
+                  TextFormField(
+                    controller: _valueController,
                     decoration: InputDecoration(
-                      labelText: 'Select Operation',
+                      labelText: 'Value',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       prefixIcon: Icon(
-                        Icons.settings,
+                        Icons.input,
                         color: widget.dataStructureInfo.color,
                       ),
                     ),
-                    items: operations.map((operation) {
-                      return DropdownMenuItem(
-                        value: operation,
-                        child: Text(
-                          operation,
-                          overflow: TextOverflow.ellipsis,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                  ),
+                if (!isArray) const SizedBox(height: 12),
+                // Execute button (for non-array)
+                if (_selectedOperation != null && !isArray)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _selectedOperation != null ? _executeOperation : null,
+                      icon: Icon(
+                        _getOperationIcon(_selectedOperation),
+                        color: Colors.white,
+                      ),
+                      label: Text(
+                        _selectedOperation ?? 'Select an operation',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: widget.dataStructureInfo.color,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedOperation = value;
-                      });
-                    },
-                  ),
-                ),
-              if (!isArray) const SizedBox(height: 12),
-              // Value input (for operations that need a value)
-              if (_selectedOperation != null && _needsValue(_selectedOperation!) && !isArray)
-                TextFormField(
-                  controller: _valueController,
-                  decoration: InputDecoration(
-                    labelText: 'Value',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.input,
-                      color: widget.dataStructureInfo.color,
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                ),
-              if (!isArray) const SizedBox(height: 12),
-              // Execute button (for non-array)
-              if (_selectedOperation != null && !isArray)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _selectedOperation != null ? _executeOperation : null,
-                    icon: Icon(
-                      _getOperationIcon(_selectedOperation),
-                      color: Colors.white,
-                    ),
-                    label: Text(
-                      _selectedOperation ?? 'Select an operation',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: widget.dataStructureInfo.color,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
-                ),
-              if (!isArray) const SizedBox(height: 12),
-              // Quick operation buttons (always show for array)
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: operations.map((operation) {
-                  return ActionChip(
-                    label: Text(operation),
-                    avatar: Icon(
-                      _getOperationIcon(operation),
-                      size: 16,
-                      color: widget.dataStructureInfo.color,
-                    ),
-                    onPressed: () async {
-                      if (isArray) {
-                        if (!_needsValue(operation)) {
-                          if (operation == 'Traverse') {
-                            // Generate animation steps
-                            widget.dataStructure.traverse();
-                            final nodes = widget.dataStructure.nodes;
-                            final steps = widget.dataStructure.animationSteps.length;
-                            AppLogger.operation('Traverse: nodes=${nodes.map((n) => n.value).toList()}');
-                            AppLogger.operation('Traverse: steps=$steps');
-                            
-                            // Set to step 0 and update UI
-                            setState(() {
-                              widget.dataStructure.goToStep(0);
-                            });
-                            widget.onOperationPerformed();
-                            
-                            // Notify parent to start animation
-                            if (widget.onAnimationStateChanged != null) {
-                              widget.onAnimationStateChanged!(true);
+                if (!isArray) const SizedBox(height: 12),
+                // Quick operation buttons (always show for array)
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    ...operations.map((operation) {
+                      return ActionChip(
+                        label: Text(operation),
+                        avatar: Icon(
+                          _getOperationIcon(operation),
+                          size: 16,
+                          color: widget.dataStructureInfo.color,
+                        ),
+                        onPressed: () async {
+                          if (isArray) {
+                            if (!_needsValue(operation)) {
+                              if (operation == 'Traverse') {
+                                // Show progress indicator
+                                if (widget.onShowProgress != null) {
+                                  AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                  widget.onShowProgress!();
+                                }
+                                // Generate animation steps
+                                widget.dataStructure.traverse();
+                                final nodes = widget.dataStructure.nodes;
+                                final steps = widget.dataStructure.animationSteps.length;
+                                AppLogger.operation('Traverse: nodes= nodes.map((n) => n.value).toList()}');
+                                AppLogger.operation('Traverse: steps=$steps');
+                                
+                                // Set to step 0 and update UI
+                                setState(() {
+                                  widget.dataStructure.goToStep(0);
+                                });
+                                widget.onOperationPerformed();
+                                
+                                // Notify parent to start animation
+                                if (widget.onAnimationStateChanged != null) {
+                                  widget.onAnimationStateChanged!(true);
+                                }
+                              } else if (operation == 'Search') {
+                                AppLogger.operation('Search operation selected, showing dialog');
+                                setState(() {
+                                  _selectedOperation = operation;
+                                });
+                                AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                                // Show dialog for search value
+                                _showValueDialog(operation);
+                              } else if (operation == 'Insert') {
+                                AppLogger.operation('Insert operation selected, showing dialog');
+                                setState(() {
+                                  _selectedOperation = operation;
+                                });
+                                AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                                // Show dialog for insert value
+                                _showValueDialog(operation);
+                              } else if (operation == 'Delete') {
+                                AppLogger.operation('Delete operation selected, showing dialog');
+                                setState(() {
+                                  _selectedOperation = operation;
+                                });
+                                AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                                // Show dialog for delete value
+                                _showValueDialog(operation);
+                              } else {
+                                setState(() {
+                                  _selectedOperation = operation;
+                                });
+                                _executeOperation();
+                              }
+                            } else {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _showValueDialog(operation);
                             }
-                          } else if (operation == 'Search') {
-                            AppLogger.operation('Search operation selected, showing dialog');
-                            setState(() {
-                              _selectedOperation = operation;
-                            });
-                            AppLogger.operation('_selectedOperation set to: $_selectedOperation');
-                            // Show dialog for search value
-                            _showValueDialog(operation);
-                          } else if (operation == 'Insert') {
-                            AppLogger.operation('Insert operation selected, showing dialog');
-                            setState(() {
-                              _selectedOperation = operation;
-                            });
-                            AppLogger.operation('_selectedOperation set to: $_selectedOperation');
-                            // Show dialog for insert value
-                            _showValueDialog(operation);
-                          } else if (operation == 'Delete') {
-                            AppLogger.operation('Delete operation selected, showing dialog');
-                            setState(() {
-                              _selectedOperation = operation;
-                            });
-                            AppLogger.operation('_selectedOperation set to: $_selectedOperation');
-                            // Show dialog for delete value
-                            _showValueDialog(operation);
                           } else {
                             setState(() {
                               _selectedOperation = operation;
                             });
                             _executeOperation();
                           }
-                        } else {
-                          setState(() {
-                            _selectedOperation = operation;
-                          });
-                          _showValueDialog(operation);
-                        }
-                      } else {
-                        setState(() {
-                          _selectedOperation = operation;
-                        });
-                        _executeOperation();
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              // Generate Data button (for array)
-              if (isArray)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _showGenerateRandomDialog,
-                    icon: const Icon(Icons.shuffle, color: Colors.white),
-                    label: const Text(
-                      'Generate Random Data',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: widget.dataStructureInfo.color,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        },
+                      );
+                    }).toList(),
+                    // Generate Data button (for array) - now part of the Wrap
+                    if (isArray)
+                      ActionChip(
+                        label: const Text('Generate Random Data'),
+                        avatar: Icon(
+                          Icons.shuffle,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        backgroundColor: widget.dataStructureInfo.color,
+                        labelStyle: const TextStyle(color: Colors.white),
+                        onPressed: _showGenerateRandomDialog,
                       ),
-                    ),
-                  ),
+                  ],
                 ),
-            ],
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
         ),
       ),
@@ -288,6 +294,12 @@ class _OperationControlsState extends State<OperationControls> {
     }
 
     AppLogger.operation('Executing $_selectedOperation with value: $value');
+
+    // Show progress indicator for operations that require it
+    if (['Insert', 'Delete', 'Search', 'Traverse', 'Push', 'Pop', 'Enqueue', 'Dequeue'].contains(_selectedOperation)) {
+      AppLogger.ui('Calling onShowProgress from _executeOperation ($_selectedOperation)');
+      widget.onShowProgress?.call();
+    }
 
     switch (_selectedOperation) {
       case 'Insert':
@@ -370,7 +382,11 @@ class _OperationControlsState extends State<OperationControls> {
                 final value = int.tryParse(controller.text);
                 if (value != null) {
                   Navigator.of(context).pop();
-                  
+                  // Show progress indicator before running the operation
+                  if (widget.onShowProgress != null) {
+                    AppLogger.ui('Calling onShowProgress from dialog Execute ($operation)');
+                    widget.onShowProgress!();
+                  }
                   // Execute the operation
                   switch (operation) {
                     case 'Insert':
@@ -383,13 +399,11 @@ class _OperationControlsState extends State<OperationControls> {
                       widget.dataStructure.search(value);
                       break;
                   }
-                  
                   // Set to step 0 and update UI
                   setState(() {
                     widget.dataStructure.goToStep(0);
                   });
                   widget.onOperationPerformed();
-                  
                   // Notify parent to start animation
                   if (widget.onAnimationStateChanged != null) {
                     widget.onAnimationStateChanged!(true);
@@ -474,6 +488,8 @@ class _OperationControlsState extends State<OperationControls> {
     if (widget.dataStructure is ArrayDataStructure) {
       (widget.dataStructure as ArrayDataStructure).addNodesDirectly(values);
       widget.onOperationPerformed();
+      AppLogger.ui('Calling onHideProgress after generating random data');
+      widget.onHideProgress?.call(); // hide progress after generating data
     }
   }
 } 

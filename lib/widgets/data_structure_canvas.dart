@@ -121,7 +121,10 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
 
   List<Widget> _buildInteractiveNodes() {
     final nodes = widget.dataStructure.nodes;
-    final startX = MediaQuery.of(context).size.width / 2 - AppConstants.nodeBoxWidth / 2;
+    // Calculate the total width of index + spacing + node box
+    final totalItemWidth = 30 + 8 + AppConstants.nodeBoxWidth;
+    // Center the entire row of items in the canvas
+    final startX = (MediaQuery.of(context).size.width - totalItemWidth) / 2;
 
     return List.generate(nodes.length, (index) {
       final node = nodes[index];
@@ -131,30 +134,50 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
       return Positioned(
         left: x,
         top: y,
-        child: GestureDetector(
-          onTap: () => _showEditDialog(index, node.value),
-          child: Container(
-            width: AppConstants.nodeBoxWidth,
-            height: AppConstants.nodeBoxHeight,
-            decoration: BoxDecoration(
-              color: (node.color != null && node.color != AppConstants.defaultNodeColor) ? node.color : Colors.transparent, // Show color only if it's a highlight color
-              borderRadius: BorderRadius.circular(AppConstants.nodeBorderRadius),
-              border: Border.all(
-                color: AppConstants.defaultNodeColor, // Always gray outline
-                width: AppConstants.nodeBorderWidth,
-              ),
-            ),
-            child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Index number (outside, to the left of the box)
+            Container(
+              width: 30,
+              alignment: Alignment.centerRight,
               child: Text(
-                node.value.toString(),
+                index.toString(),
                 style: TextStyle(
-                  color: (node.color != null && node.color != AppConstants.defaultNodeColor) ? Colors.white : Colors.black, // White text when highlighted, black when default
-                  fontSize: AppConstants.nodeTextSize,
-                  fontWeight: AppConstants.nodeTextWeight,
+                  color: Colors.grey[600],
+                  fontSize: AppConstants.nodeTextSize * 0.7,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-          ),
+            const SizedBox(width: 8),
+            // Node box (with only the value inside)
+            GestureDetector(
+              onTap: () => _showEditDialog(index, node.value),
+              child: Container(
+                width: AppConstants.nodeBoxWidth,
+                height: AppConstants.nodeBoxHeight,
+                decoration: BoxDecoration(
+                  color: (node.color != null && node.color != AppConstants.defaultNodeColor) ? node.color : Colors.transparent, // Show color only if it's a highlight color
+                  borderRadius: BorderRadius.circular(AppConstants.nodeBorderRadius),
+                  border: Border.all(
+                    color: AppConstants.defaultNodeColor, // Always gray outline
+                    width: AppConstants.nodeBorderWidth,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    node.value.toString(),
+                    style: TextStyle(
+                      color: (node.color != null && node.color != AppConstants.defaultNodeColor) ? Colors.white : Colors.black, // White text when highlighted, black when default
+                      fontSize: AppConstants.nodeTextSize,
+                      fontWeight: AppConstants.nodeTextWeight,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     });

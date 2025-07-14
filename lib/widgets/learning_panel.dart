@@ -25,66 +25,164 @@ class LearningPanel extends StatelessWidget {
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Icon(
-                    Icons.school,
-                    color: dataStructureInfo.color,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Learning Mode',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              // Step counter and algorithm info
-              if (hasAnimation) ...[
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
                 Row(
                   children: [
+                    Icon(
+                      Icons.school,
+                      color: dataStructureInfo.color,
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Step ${currentStep + 1} of $totalSteps',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                        'Learning Mode',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: dataStructureInfo.color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: dataStructureInfo.color.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Text(
-                        _getAlgorithmType(),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: dataStructureInfo.color,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-              ],
-              
-              // Current step description
-              if (hasAnimation && currentStep < totalSteps) ...[
+                
+                // Step counter and algorithm info
+                if (hasAnimation) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Step ${currentStep + 1} of $totalSteps',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: dataStructureInfo.color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: dataStructureInfo.color.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          _getAlgorithmType(),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: dataStructureInfo.color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                
+                // Current step description
+                if (hasAnimation && currentStep < totalSteps) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Current Step',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          dataStructure.animationSteps[currentStep].description,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        if (dataStructure.animationSteps[currentStep].insights.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.lightbulb_outline,
+                                  size: 16,
+                                  color: Colors.blue[700],
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    dataStructure.animationSteps[currentStep].insights,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.blue[700],
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                
+                // Code snippet
+                if (hasAnimation && currentStep < totalSteps) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Code',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          dataStructure.animationSteps[currentStep].code,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.green[400],
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                
+                // Color legend
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -99,157 +197,61 @@ class LearningPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Current Step',
+                        'Color Legend',
                         style: theme.textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        dataStructure.animationSteps[currentStep].description,
-                        style: theme.textTheme.bodyMedium,
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 6,
+                        children: [
+                          _buildColorLegendItem('Default/Unvisited', AppConstants.defaultNodeColor, theme),
+                          _buildColorLegendItem('Currently Processing', AppConstants.currentNodeColor, theme),
+                          _buildColorLegendItem('Found/Target', AppConstants.foundNodeColor, theme),
+                          _buildColorLegendItem('Checked/Visited', AppConstants.checkedNodeColor, theme),
+                          _buildColorLegendItem('Insertion Position', AppConstants.insertionNodeColor, theme),
+                        ],
                       ),
-                      if (dataStructure.animationSteps[currentStep].insights.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: Colors.blue.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline,
-                                size: 16,
-                                color: Colors.blue[700],
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  dataStructure.animationSteps[currentStep].insights,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.blue[700],
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
+                
                 const SizedBox(height: 16),
-              ],
-              
-              // Code snippet
-              if (hasAnimation && currentStep < totalSteps) ...[
+                
+                // Data structure info
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[900],
+                    color: dataStructureInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: dataStructureInfo.color.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Code',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[300],
+                        dataStructureInfo.name,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: dataStructureInfo.color,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        dataStructure.animationSteps[currentStep].code,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.green[400],
-                          fontFamily: 'monospace',
-                        ),
+                        dataStructureInfo.description,
+                        style: theme.textTheme.bodySmall,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
               ],
-              
-              // Color legend
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Color Legend',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 6,
-                      children: [
-                        _buildColorLegendItem('Default/Unvisited', AppConstants.defaultNodeColor, theme),
-                        _buildColorLegendItem('Currently Processing', AppConstants.currentNodeColor, theme),
-                        _buildColorLegendItem('Found/Target', AppConstants.foundNodeColor, theme),
-                        _buildColorLegendItem('Checked/Visited', AppConstants.checkedNodeColor, theme),
-                        _buildColorLegendItem('Insertion Position', AppConstants.insertionNodeColor, theme),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Data structure info
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: dataStructureInfo.color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: dataStructureInfo.color.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      dataStructureInfo.name,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: dataStructureInfo.color,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dataStructureInfo.description,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -15,51 +15,41 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height - kToolbarHeight - 32,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Text(
+              'Choose a Data Structure',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Text(
-                  'Choose a Data Structure',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Select a data structure to visualize its operations and algorithms',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // Data structure grid
-                SizedBox(
-                  height: 400,
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.85,
-                    ),
-                    itemCount: DataStructureFactory.dataStructures.length,
-                    itemBuilder: (context, index) {
-                      final dataStructure = DataStructureFactory.dataStructures[index];
-                      return _buildDataStructureCard(context, dataStructure);
-                    },
-                  ),
-                ),
-              ],
+            const SizedBox(height: 8),
+            Text(
+              'Select a data structure to visualize its operations and algorithms',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
             ),
-          ),
+            const SizedBox(height: 32),
+            // Data structure grid
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.85,
+                ),
+                itemCount: DataStructureFactory.dataStructures.length,
+                itemBuilder: (context, index) {
+                  final dataStructure = DataStructureFactory.dataStructures[index];
+                  return _buildDataStructureCard(context, dataStructure);
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
