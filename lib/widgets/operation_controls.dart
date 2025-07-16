@@ -1,18 +1,14 @@
 // OperationControls: UI and logic for data structure operations panel
 // Shows operation buttons, dialogs, and handles user actions for array, stack, and linked list
 
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/base_data_structure.dart';
 import '../models/data_structure_info.dart';
-import '../data_structures/array_data_structure.dart';
+import '../data_structures/linked_list_data_structure.dart';
 import '../utils/constants.dart';
 import '../utils/logger.dart';
-import '../data_structures/linked_list_data_structure.dart';
 import '../services/operation_controller.dart';
-import '../services/validation_service.dart';
-import '../services/error_handler.dart';
 
 /// Widget for displaying and handling operations for a data structure (array, stack, linked list)
 /// Shows operation chips, dialogs for value input, and handles random data generation
@@ -152,6 +148,113 @@ class _OperationControlsState extends State<OperationControls> {
                       );
                     }).toList(),
                     // Generate random data for linked list
+                    ActionChip(
+                      label: const Text('Generate Random Data'),
+                      avatar: Icon(
+                        Icons.shuffle,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      backgroundColor: widget.dataStructureInfo.color,
+                      labelStyle: const TextStyle(color: Colors.white),
+                      onPressed: _showGenerateRandomDialog,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build controls for queue operations (quick chips, random data)
+  Widget _buildQueueControls(BuildContext context, ThemeData theme, List<String> operations) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Operations',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    // All queue operations as chips
+                    ...operations.map((operation) {
+                      return ActionChip(
+                        label: Text(operation),
+                        avatar: Icon(
+                          _getOperationIcon(operation),
+                          size: 16,
+                          color: widget.dataStructureInfo.color,
+                        ),
+                        onPressed: () async {
+                          // Handle quick operations and dialogs
+                          if (!_needsValue(operation)) {
+                            if (operation == 'Traverse') {
+                              // Show progress bar, start traverse
+                              if (widget.onShowProgress != null) {
+                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                widget.onShowProgress!();
+                              }
+                              widget.dataStructure.traverse();
+                              setState(() {
+                                widget.dataStructure.goToStep(0);
+                              });
+                              widget.onOperationPerformed();
+                              if (widget.onAnimationStateChanged != null) {
+                                widget.onAnimationStateChanged!(true);
+                              }
+                            } else if (operation == 'Front') {
+                              // Show progress bar, perform front
+                              if (widget.onShowProgress != null) {
+                                AppLogger.ui('Calling onShowProgress from ActionChip (Front)');
+                                widget.onShowProgress!();
+                              }
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            } else if (operation == 'IsEmpty') {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            } else if (operation == 'Dequeue') {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            } else {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            }
+                          } else {
+                            setState(() {
+                              _selectedOperation = operation;
+                            });
+                            _showValueDialog(operation);
+                          }
+                        },
+                      );
+                    }).toList(),
+                    // Generate random data for queue
                     ActionChip(
                       label: const Text('Generate Random Data'),
                       avatar: Icon(
@@ -375,9 +478,8 @@ class _OperationControlsState extends State<OperationControls> {
                                 widget.onShowProgress!();
                               }
                               widget.dataStructure.traverse();
-                              final nodes = widget.dataStructure.nodes;
                               final steps = widget.dataStructure.animationSteps.length;
-                              AppLogger.operation('Traverse: nodes= nodes.map((n) => n.value).toList()}');
+                              AppLogger.operation('Traverse: nodes=${widget.dataStructure.nodes.map((n) => n.value).toList()}');
                               AppLogger.operation('Traverse: steps=$steps');
                               setState(() {
                                 widget.dataStructure.goToStep(0);
@@ -454,12 +556,16 @@ class _OperationControlsState extends State<OperationControls> {
     final isArray = widget.dataStructureInfo.type == DataStructureType.array;
     final isLinkedList = widget.dataStructureInfo.type == DataStructureType.linkedList;
     final isStack = widget.dataStructureInfo.type == DataStructureType.stack;
+    final isQueue = widget.dataStructureInfo.type == DataStructureType.queue;
 
     if (isLinkedList) {
       return _buildLinkedListControls(context, theme, operations);
     }
     if (isStack) {
       return _buildStackControls(context, theme, operations);
+    }
+    if (isQueue) {
+      return _buildQueueControls(context, theme, operations);
     }
     if (isArray) {
       return _buildArrayControls(context, theme, operations);
@@ -491,6 +597,8 @@ class _OperationControlsState extends State<OperationControls> {
         return Icons.search;
       case 'Traverse':
         return Icons.list;
+      case 'IsEmpty':
+        return Icons.check_box_outline_blank;
       default:
         return Icons.settings;
     }
@@ -520,7 +628,7 @@ class _OperationControlsState extends State<OperationControls> {
     AppLogger.operation('Executing $_selectedOperation with value: $value');
 
     // Show progress bar for operations that need it
-    final progressOperations = ['Add to Start', 'Add to End', 'Delete', 'Search', 'Traverse', 'Push', 'Pop', 'Insert', 'Enqueue', 'Dequeue'];
+    final progressOperations = ['Add to Start', 'Add to End', 'Delete', 'Search', 'Traverse', 'Push', 'Pop', 'Insert', 'Enqueue', 'Dequeue', 'Front'];
     if (progressOperations.contains(_selectedOperation)) {
       AppLogger.ui('Calling onShowProgress from _executeOperation ($_selectedOperation)');
       widget.onShowProgress?.call();
@@ -563,7 +671,7 @@ class _OperationControlsState extends State<OperationControls> {
     
     // Auto-start animation for operations that have animation steps
     if (completedOperation != null && 
-        ['Push', 'Pop', 'Insert', 'Delete', 'Search', 'Add to Start', 'Add to End'].contains(completedOperation)) {
+        ['Push', 'Pop', 'Insert', 'Delete', 'Search', 'Add to Start', 'Add to End', 'Enqueue', 'Dequeue', 'Front'].contains(completedOperation)) {
       if (widget.onAnimationStateChanged != null) {
         widget.onAnimationStateChanged!(true);
       }

@@ -1,13 +1,11 @@
+import 'package:flutter/material.dart';
 import '../models/base_data_structure.dart';
-import '../utils/logger.dart';
 import '../models/data_structure_node.dart';
 import '../models/animation_step.dart';
 import '../utils/constants.dart';
-import '../services/animation_step_builder.dart';
-import '../services/error_handler.dart';
 import '../services/validation_service.dart';
-import '../utils/app_strings.dart';
-import 'package:flutter/material.dart';
+import '../services/error_handler.dart';
+import '../utils/logger.dart';
 
 class StackDataStructure extends BaseDataStructure {
   // Stack follows LIFO (Last In, First Out) principle

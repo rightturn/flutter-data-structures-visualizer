@@ -1,5 +1,4 @@
 import '../utils/logger.dart';
-import '../utils/app_strings.dart';
 
 /// Centralized error handling service for the application
 /// Provides consistent error handling and user-friendly error messages

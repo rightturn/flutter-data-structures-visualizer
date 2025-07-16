@@ -84,6 +84,7 @@ class ValidationService {
       case 'pop':
       case 'dequeue':
       case 'peek':
+      case 'front':
         if (nodes.isEmpty) {
           return ValidationResult.error('Cannot perform $operationType on empty structure');
         }

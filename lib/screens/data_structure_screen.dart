@@ -32,7 +32,6 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
   late AnimationService _animationService;
   final GlobalKey<DataStructureCanvasState> _canvasKey = GlobalKey<DataStructureCanvasState>();
   bool _isPlaying = false;
-  int _canvasRebuildKey = 0;
   bool _showProgressIndicator = false;
 
   // ================== PUBLIC METHODS (LIFECYCLE, BUILD) ==================
@@ -166,7 +165,6 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
       _isPlaying = false;
       _dataStructure.resetToDefault();
     });
-    _canvasRebuildKey++;
     _hideProgress();
   }
 

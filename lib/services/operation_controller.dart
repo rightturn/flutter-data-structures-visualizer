@@ -152,6 +152,14 @@ class OperationController {
           dataStructure.clearAnimationSteps();
           break;
         
+        case DataStructureType.queue:
+          dataStructure.reset();
+          for (final value in values) {
+            dataStructure.insert(value);
+          }
+          dataStructure.clearAnimationSteps();
+          break;
+        
         default:
           return OperationResult.error('Random data generation not supported for this data structure');
       }

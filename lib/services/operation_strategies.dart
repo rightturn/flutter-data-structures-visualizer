@@ -1,9 +1,7 @@
 import '../models/base_data_structure.dart';
-import '../models/data_structure_node.dart';
-import '../models/animation_step.dart';
 import '../utils/logger.dart';
 import '../data_structures/stack_data_structure.dart';
-import 'animation_step_builder.dart';
+import '../data_structures/queue_data_structure.dart';
 
 /// Abstract base class for data structure operation strategies
 /// Implements the Strategy pattern to encapsulate different operation algorithms
@@ -19,7 +17,12 @@ class InsertStrategy extends OperationStrategy {
       AppLogger.dataStructure('InsertStrategy: value is null, cannot insert');
       return;
     }
-    dataStructure.insert(value);
+    if (dataStructure is QueueDataStructure) {
+      // For queue, insert is enqueue operation
+      dataStructure.enqueue(value);
+    } else {
+      dataStructure.insert(value);
+    }
   }
 }
 
@@ -30,6 +33,9 @@ class DeleteStrategy extends OperationStrategy {
     if (dataStructure is StackDataStructure) {
       // For stack, delete is pop operation (no value needed)
       dataStructure.pop();
+    } else if (dataStructure is QueueDataStructure) {
+      // For queue, delete is dequeue operation (no value needed)
+      dataStructure.dequeue();
     } else {
       if (value == null) {
         AppLogger.dataStructure('DeleteStrategy: value is null, cannot delete');
@@ -47,6 +53,9 @@ class SearchStrategy extends OperationStrategy {
     if (dataStructure is StackDataStructure) {
       // For stack, search is peek operation (no value needed)
       dataStructure.peek();
+    } else if (dataStructure is QueueDataStructure) {
+      // For queue, search is front operation (no value needed)
+      dataStructure.front();
     } else {
       if (value == null) {
         AppLogger.dataStructure('SearchStrategy: value is null, cannot search');
@@ -89,6 +98,19 @@ class PeekStrategy extends OperationStrategy {
   }
 }
 
+/// Strategy for isEmpty operations (queue specific)
+class IsEmptyStrategy extends OperationStrategy {
+  @override
+  void execute(BaseDataStructure dataStructure, {int? value}) {
+    if (dataStructure is QueueDataStructure) {
+      final isEmpty = dataStructure.isEmpty();
+      AppLogger.dataStructure('IsEmptyStrategy: Queue is ${isEmpty ? 'empty' : 'not empty'}');
+    } else {
+      AppLogger.dataStructure('IsEmptyStrategy: IsEmpty operation only supported for Queue');
+    }
+  }
+}
+
 /// Factory for creating operation strategies
 class OperationStrategyFactory {
   static OperationStrategy? getStrategy(String operationType) {
@@ -110,6 +132,8 @@ class OperationStrategyFactory {
         return PeekStrategy();
       case 'traverse':
         return TraversalStrategy();
+      case 'isempty':
+        return IsEmptyStrategy();
       default:
         AppLogger.dataStructure('Unknown operation type: $operationType');
         return null;
@@ -129,6 +153,7 @@ class OperationStrategyFactory {
       'dequeue',
       'peek',
       'front',
+      'isempty',
     ];
   }
 }
@@ -224,6 +249,7 @@ class OperationExecutor {
       'Dequeue',
       'Peek',
       'Front',
+      'IsEmpty',
     ];
   }
 }

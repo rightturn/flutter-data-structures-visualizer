@@ -8,7 +8,6 @@ import '../utils/constants.dart';
 class AnimationStepBuilder {
   static const String _arrayPrefix = 'Array';
   static const String _linkedListPrefix = 'Linked List';
-  static const String _stackPrefix = 'Stack';
 
   /// Creates an animation step for array insertion operation
   static AnimationStep buildArrayInsertStep({

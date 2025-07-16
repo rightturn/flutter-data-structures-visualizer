@@ -65,6 +65,7 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
       DataStructureType.array: ArrayRenderer(),
       DataStructureType.linkedList: LinkedListRenderer(),
       DataStructureType.stack: StackRenderer(),
+      DataStructureType.queue: QueueRenderer(),
     };
   }
 
@@ -467,6 +468,108 @@ class StackRenderer extends DataStructureRenderer {
         child: buildNodeWidget(actualIndex, node, onNodeTap, displayIndex: stackIndex),
       );
     });
+  }
+}
+
+// Queue Renderer - displays queue as horizontal array with front/rear indicators
+class QueueRenderer extends DataStructureRenderer {
+  @override
+  Widget buildView(
+      BuildContext context,
+      BaseDataStructure dataStructure,
+      DataStructureInfo dataStructureInfo,
+      AnimationController animationController,
+      ScrollController scrollController,
+      Function(int, int) onNodeTap,
+      ) {
+    return SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        height: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Queue visualization
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Front indicator
+                if (dataStructure.nodes.isNotEmpty) ...[
+                  Container(
+                    margin: const EdgeInsets.only(right: 8.0),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.arrow_forward, color: Colors.blue),
+                        Text('Front', style: TextStyle(color: Colors.blue, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ],
+                // Queue nodes
+                ..._buildQueueNodes(context, dataStructure.nodes, onNodeTap),
+                // Rear indicator
+                if (dataStructure.nodes.isNotEmpty) ...[
+                  Container(
+                    margin: const EdgeInsets.only(left: 8.0),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.arrow_back, color: Colors.green),
+                        Text('Rear', style: TextStyle(color: Colors.green, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            // Empty queue message
+            if (dataStructure.nodes.isEmpty) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: const Text(
+                  'Queue is empty\nAdd elements using Enqueue',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildQueueNodes(
+      BuildContext context,
+      List<dynamic> nodes,
+      Function(int, int) onNodeTap,
+      ) {
+    return List.generate(nodes.length, (index) {
+      final node = nodes[index];
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: buildNodeWidget(index, node, onNodeTap, displayIndex: index),
+      );
+    });
+  }
+
+  @override
+  double calculateTotalHeight(int nodeCount) {
+    return AppConstants.nodeBoxHeight + 100; // Extra space for indicators
+  }
+
+  @override
+  double calculateScrollPosition(int nodeIndex, double viewportDimension, double maxScrollExtent) {
+    final nodeWidth = AppConstants.nodeBoxWidth + 4.0; // Including margin
+    final targetX = nodeIndex * nodeWidth;
+    final centerX = targetX - (viewportDimension / 2) + (nodeWidth / 2);
+    return centerX.clamp(0.0, maxScrollExtent);
   }
 }
 
