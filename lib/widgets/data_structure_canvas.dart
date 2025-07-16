@@ -471,7 +471,7 @@ class StackRenderer extends DataStructureRenderer {
   }
 }
 
-// Queue Renderer - displays queue as horizontal array with front/rear indicators
+// Queue Renderer - displays queue vertically with front at top, rear at bottom
 class QueueRenderer extends DataStructureRenderer {
   @override
   Widget buildView(
@@ -482,60 +482,38 @@ class QueueRenderer extends DataStructureRenderer {
       ScrollController scrollController,
       Function(int, int) onNodeTap,
       ) {
+    final totalHeight = calculateTotalHeight(dataStructure.nodes.length);
+
     return SingleChildScrollView(
       controller: scrollController,
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        height: double.infinity,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      scrollDirection: Axis.vertical,
+      child: SizedBox(
+        width: double.infinity,
+        height: totalHeight,
+        child: Stack(
           children: [
-            // Queue visualization
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Front indicator
-                if (dataStructure.nodes.isNotEmpty) ...[
-                  Container(
-                    margin: const EdgeInsets.only(right: 8.0),
-                    child: const Column(
-                      children: [
-                        Icon(Icons.arrow_forward, color: Colors.blue),
-                        Text('Front', style: TextStyle(color: Colors.blue, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ],
-                // Queue nodes
-                ..._buildQueueNodes(context, dataStructure.nodes, onNodeTap),
-                // Rear indicator
-                if (dataStructure.nodes.isNotEmpty) ...[
-                  Container(
-                    margin: const EdgeInsets.only(left: 8.0),
-                    child: const Column(
-                      children: [
-                        Icon(Icons.arrow_back, color: Colors.green),
-                        Text('Rear', style: TextStyle(color: Colors.green, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
+            CustomPaint(
+              painter: QueueIndicatorPainter(
+                nodeCount: dataStructure.nodes.length,
+                canvasWidth: MediaQuery.of(context).size.width,
+              ),
+              child: Container(),
             ),
+            ..._buildNodes(context, dataStructure.nodes, onNodeTap),
             // Empty queue message
             if (dataStructure.nodes.isEmpty) ...[
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: const Text(
-                  'Queue is empty\nAdd elements using Enqueue',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const Text(
+                    'Queue is empty\nAdd elements using Enqueue',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
                 ),
               ),
             ],
@@ -545,15 +523,22 @@ class QueueRenderer extends DataStructureRenderer {
     );
   }
 
-  List<Widget> _buildQueueNodes(
+  List<Widget> _buildNodes(
       BuildContext context,
       List<dynamic> nodes,
       Function(int, int) onNodeTap,
       ) {
+    final nodeRowWidth = AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing;
+    final startX = (MediaQuery.of(context).size.width - nodeRowWidth) / 2;
+
     return List.generate(nodes.length, (index) {
       final node = nodes[index];
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 2.0),
+      // For queue: index 0 is front (top), index n-1 is rear (bottom)
+      final y = AppConstants.nodeStartY + index * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+
+      return Positioned(
+        left: startX,
+        top: y,
         child: buildNodeWidget(index, node, onNodeTap, displayIndex: index),
       );
     });
@@ -561,15 +546,19 @@ class QueueRenderer extends DataStructureRenderer {
 
   @override
   double calculateTotalHeight(int nodeCount) {
-    return AppConstants.nodeBoxHeight + 100; // Extra space for indicators
+    if (nodeCount == 0) return AppConstants.minCanvasHeight;
+    return (nodeCount * AppConstants.nodeBoxHeight +
+        (nodeCount - 1) * CanvasConstants.nodeSpacing +
+        2 * AppConstants.nodeStartY + 100) // Extra space for indicators
+        .clamp(AppConstants.minCanvasHeight, double.infinity);
   }
 
   @override
   double calculateScrollPosition(int nodeIndex, double viewportDimension, double maxScrollExtent) {
-    final nodeWidth = AppConstants.nodeBoxWidth + 4.0; // Including margin
-    final targetX = nodeIndex * nodeWidth;
-    final centerX = targetX - (viewportDimension / 2) + (nodeWidth / 2);
-    return centerX.clamp(0.0, maxScrollExtent);
+    final nodeY = AppConstants.nodeStartY + nodeIndex * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+    final nodeBottom = nodeY + AppConstants.nodeBoxHeight;
+    final targetScroll = nodeBottom - (viewportDimension * AppConstants.scrollTargetRatio);
+    return targetScroll.clamp(0.0, maxScrollExtent);
   }
 }
 
@@ -799,6 +788,103 @@ class StackTopArrowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant StackTopArrowPainter oldDelegate) {
+    return oldDelegate.nodeCount != nodeCount;
+  }
+}
+
+class QueueIndicatorPainter extends CustomPainter {
+  final int nodeCount;
+  final double canvasWidth;
+
+  QueueIndicatorPainter({
+    required this.nodeCount,
+    required this.canvasWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (nodeCount == 0) return;
+
+    final nodeRowWidth = AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing;
+    final startX = (canvasWidth - nodeRowWidth) / 2;
+    
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    // Draw Front indicator (pointing to top/first node)
+    final frontNodeY = AppConstants.nodeStartY;
+    final frontArrowStartX = startX + nodeRowWidth + CanvasConstants.topArrowOffset;
+    final frontArrowEndX = startX + nodeRowWidth;
+    final frontArrowY = frontNodeY + AppConstants.nodeBoxHeight / 2;
+
+    paint.color = Colors.blue;
+    canvas.drawLine(Offset(frontArrowStartX, frontArrowY), Offset(frontArrowEndX, frontArrowY), paint);
+
+    // Draw arrowhead pointing left
+    final frontPath = Path();
+    frontPath.moveTo(frontArrowEndX, frontArrowY);
+    frontPath.lineTo(frontArrowEndX + CanvasConstants.arrowSize, frontArrowY - CanvasConstants.arrowSize / 2);
+    frontPath.moveTo(frontArrowEndX, frontArrowY);
+    frontPath.lineTo(frontArrowEndX + CanvasConstants.arrowSize, frontArrowY + CanvasConstants.arrowSize / 2);
+    canvas.drawPath(frontPath, paint);
+
+    // Draw 'Front' label
+    final frontTextPainter = TextPainter(
+      text: TextSpan(
+        text: 'Front',
+        style: TextStyle(
+          color: Colors.blue,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    frontTextPainter.layout();
+    final frontLabelX = frontArrowStartX + (frontArrowEndX - frontArrowStartX) / 2 - frontTextPainter.width / 2;
+    final frontLabelY = frontArrowY - frontTextPainter.height - CanvasConstants.labelOffset;
+    frontTextPainter.paint(canvas, Offset(frontLabelX, frontLabelY));
+
+    // Draw Rear indicator (pointing to bottom/last node)
+    final rearNodeY = AppConstants.nodeStartY + (nodeCount - 1) * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+    final rearArrowStartX = startX + nodeRowWidth + CanvasConstants.topArrowOffset;
+    final rearArrowEndX = startX + nodeRowWidth;
+    final rearArrowY = rearNodeY + AppConstants.nodeBoxHeight / 2;
+
+    paint.color = Colors.green;
+    canvas.drawLine(Offset(rearArrowStartX, rearArrowY), Offset(rearArrowEndX, rearArrowY), paint);
+
+    // Draw arrowhead pointing left
+    final rearPath = Path();
+    rearPath.moveTo(rearArrowEndX, rearArrowY);
+    rearPath.lineTo(rearArrowEndX + CanvasConstants.arrowSize, rearArrowY - CanvasConstants.arrowSize / 2);
+    rearPath.moveTo(rearArrowEndX, rearArrowY);
+    rearPath.lineTo(rearArrowEndX + CanvasConstants.arrowSize, rearArrowY + CanvasConstants.arrowSize / 2);
+    canvas.drawPath(rearPath, paint);
+
+    // Draw 'Rear' label
+    final rearTextPainter = TextPainter(
+      text: TextSpan(
+        text: 'Rear',
+        style: TextStyle(
+          color: Colors.green,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    rearTextPainter.layout();
+    final rearLabelX = rearArrowStartX + (rearArrowEndX - rearArrowStartX) / 2 - rearTextPainter.width / 2;
+    final rearLabelY = rearArrowY + CanvasConstants.labelOffset;
+    rearTextPainter.paint(canvas, Offset(rearLabelX, rearLabelY));
+  }
+
+  @override
+  bool shouldRepaint(covariant QueueIndicatorPainter oldDelegate) {
     return oldDelegate.nodeCount != nodeCount;
   }
 }
