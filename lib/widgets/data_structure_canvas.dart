@@ -6,6 +6,29 @@ import '../data_structures/array_data_structure.dart';
 import '../utils/constants.dart';
 import '../utils/logger.dart';
 
+// Constants for better maintainability
+class CanvasConstants {
+  static const double nodeSpacing = 16.0;
+  static const double indexWidth = 30.0;
+  static const double indexSpacing = 8.0;
+  static const double arrowOffset = 40.0;
+  static const double arrowSize = 8.0;
+  static const double labelOffset = 8.0;
+  static const double topArrowOffset = 20.0;
+}
+
+// Input validation utility
+class NodeEditValidator {
+  static String? validateInput(String input) {
+    if (input.isEmpty) return 'Value cannot be empty';
+    final value = int.tryParse(input);
+    if (value == null) return 'Please enter a valid number';
+    if (value < -999 || value > 999) return 'Value must be between -999 and 999';
+    return null;
+  }
+}
+
+// Main canvas widget
 class DataStructureCanvas extends StatefulWidget {
   final BaseDataStructure dataStructure;
   final AnimationController animationController;
@@ -28,11 +51,21 @@ class DataStructureCanvas extends StatefulWidget {
 
 class DataStructureCanvasState extends State<DataStructureCanvas> {
   late ScrollController _scrollController;
+  late final Map<DataStructureType, DataStructureRenderer> _renderers;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _initializeRenderers();
+  }
+
+  void _initializeRenderers() {
+    _renderers = {
+      DataStructureType.array: ArrayRenderer(),
+      DataStructureType.linkedList: LinkedListRenderer(),
+      DataStructureType.stack: StackRenderer(),
+    };
   }
 
   @override
@@ -41,31 +74,25 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
     super.dispose();
   }
 
-  // Method to scroll to a specific node index
   void scrollToNode(int nodeIndex) {
     if (!_scrollController.hasClients) {
       AppLogger.ui('ScrollController has no clients, cannot scroll');
       return;
     }
-    
-    final nodeY = AppConstants.nodeStartY + nodeIndex * (AppConstants.nodeBoxHeight + AppConstants.nodeSpacing);
-    final nodeBottom = nodeY + AppConstants.nodeBoxHeight;
-    
-    // Get the current scroll position and viewport height
-    final currentScroll = _scrollController.offset;
-    final viewportHeight = _scrollController.position.viewportDimension;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    
-    // Calculate the target scroll position to show the node at 25% from bottom
-    final targetScroll = nodeBottom - (viewportHeight * AppConstants.scrollTargetRatio);
-    
-    // Ensure we don't scroll beyond bounds
-    final clampedScroll = targetScroll.clamp(0.0, maxScroll);
-    
-    AppLogger.ui('Scrolling to node $nodeIndex: current=$currentScroll, target=$clampedScroll, nodeY=$nodeY, viewportHeight=$viewportHeight, maxScroll=$maxScroll');
-    
+
+    final renderer = _renderers[widget.dataStructureInfo.type];
+    if (renderer == null) return;
+
+    final targetScroll = renderer.calculateScrollPosition(
+      nodeIndex,
+      _scrollController.position.viewportDimension,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    AppLogger.ui('Scrolling to node $nodeIndex: target=$targetScroll');
+
     _scrollController.animateTo(
-      clampedScroll,
+      targetScroll,
       duration: AppConstants.scrollDuration,
       curve: Curves.easeInOut,
     );
@@ -73,119 +100,35 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate required height for array
-    final isArray = widget.dataStructureInfo.type == DataStructureType.array;
-    final itemCount = widget.dataStructure.nodes.length;
-    final minHeight = AppConstants.minCanvasHeight; // Minimum height for empty/short arrays
-    final totalHeight = isArray
-        ? (itemCount > 0
-            ? (itemCount * AppConstants.nodeBoxHeight + (itemCount - 1) * AppConstants.nodeSpacing + 60.0).clamp(minHeight, double.infinity)
-            : minHeight)
-        : minHeight;
-
-    if (isArray) {
-      return SingleChildScrollView(
-        controller: _scrollController,
-        scrollDirection: Axis.vertical,
-        child: SizedBox(
-          width: double.infinity,
-          height: totalHeight,
-          child: Stack(
-            children: [
-              // Background canvas for non-interactive elements
-              CustomPaint(
-                painter: DataStructurePainter(
-                  dataStructure: widget.dataStructure,
-                  dataStructureInfo: widget.dataStructureInfo,
-                  animationValue: widget.animationController.value,
-                ),
-                child: Container(),
-              ),
-              // Interactive node widgets
-              ..._buildInteractiveNodes(),
-            ],
-          ),
-        ),
-      );
-    } else {
-      return CustomPaint(
-        painter: DataStructurePainter(
-          dataStructure: widget.dataStructure,
-          dataStructureInfo: widget.dataStructureInfo,
-          animationValue: widget.animationController.value,
-        ),
-        child: Container(),
-      );
+    final renderer = _renderers[widget.dataStructureInfo.type];
+    if (renderer == null) {
+      return _buildGenericView();
     }
+
+    return renderer.buildView(
+      context,
+      widget.dataStructure,
+      widget.dataStructureInfo,
+      widget.animationController,
+      _scrollController,
+      _showEditDialog,
+    );
   }
 
-  List<Widget> _buildInteractiveNodes() {
-    final nodes = widget.dataStructure.nodes;
-    // Calculate the total width of index + spacing + node box
-    final totalItemWidth = 30 + 8 + AppConstants.nodeBoxWidth;
-    // Center the entire row of items in the canvas
-    final startX = (MediaQuery.of(context).size.width - totalItemWidth) / 2;
-
-    return List.generate(nodes.length, (index) {
-      final node = nodes[index];
-      final x = startX;
-      final y = AppConstants.nodeStartY + index * (AppConstants.nodeBoxHeight + AppConstants.nodeSpacing);
-
-      return Positioned(
-        left: x,
-        top: y,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Index number (outside, to the left of the box)
-            Container(
-              width: 30,
-              alignment: Alignment.centerRight,
-              child: Text(
-                index.toString(),
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: AppConstants.nodeTextSize * 0.7,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Node box (with only the value inside)
-            GestureDetector(
-              onTap: () => _showEditDialog(index, node.value),
-              child: Container(
-                width: AppConstants.nodeBoxWidth,
-                height: AppConstants.nodeBoxHeight,
-                decoration: BoxDecoration(
-                  color: (node.color != null && node.color != AppConstants.defaultNodeColor) ? node.color : Colors.transparent, // Show color only if it's a highlight color
-                  borderRadius: BorderRadius.circular(AppConstants.nodeBorderRadius),
-                  border: Border.all(
-                    color: AppConstants.defaultNodeColor, // Always gray outline
-                    width: AppConstants.nodeBorderWidth,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    node.value.toString(),
-                    style: TextStyle(
-                      color: (node.color != null && node.color != AppConstants.defaultNodeColor) ? Colors.white : Colors.black, // White text when highlighted, black when default
-                      fontSize: AppConstants.nodeTextSize,
-                      fontWeight: AppConstants.nodeTextWeight,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+  Widget _buildGenericView() {
+    return CustomPaint(
+      painter: DataStructurePainter(
+        dataStructure: widget.dataStructure,
+        dataStructureInfo: widget.dataStructureInfo,
+        animationValue: widget.animationController.value,
+      ),
+      child: Container(),
+    );
   }
 
   void _showEditDialog(int index, int currentValue) {
     final controller = TextEditingController(text: currentValue.toString());
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -201,34 +144,21 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'New Value',
-                  hintText: 'Enter a new value',
+                  hintText: 'Enter a value between -999 and 999',
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
                 ],
               ),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                final newValue = int.tryParse(controller.text);
-                if (newValue != null) {
-                  // Update the node value
-                  if (widget.dataStructure is ArrayDataStructure) {
-                    final arrayStructure = widget.dataStructure as ArrayDataStructure;
-                    arrayStructure.updateNodeValue(index, newValue);
-                    widget.onNodeUpdated?.call();
-                  }
-                  Navigator.of(context).pop();
-                }
-              },
+              onPressed: () => _handleUpdate(controller.text, index),
               child: const Text('Update'),
             ),
           ],
@@ -236,8 +166,311 @@ class DataStructureCanvasState extends State<DataStructureCanvas> {
       },
     );
   }
+
+  void _handleUpdate(String input, int index) {
+    final validationError = NodeEditValidator.validateInput(input);
+    if (validationError != null) {
+      _showErrorDialog(validationError);
+      return;
+    }
+
+    final newValue = int.parse(input);
+    if (widget.dataStructure is ArrayDataStructure) {
+      final arrayStructure = widget.dataStructure as ArrayDataStructure;
+      arrayStructure.updateNodeValue(index, newValue);
+      widget.onNodeUpdated?.call();
+    }
+    Navigator.of(context).pop();
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Invalid Input'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
+// Abstract base class for data structure renderers
+abstract class DataStructureRenderer {
+  Widget buildView(
+      BuildContext context,
+      BaseDataStructure dataStructure,
+      DataStructureInfo dataStructureInfo,
+      AnimationController animationController,
+      ScrollController scrollController,
+      Function(int, int) onNodeTap,
+      );
+
+  double calculateScrollPosition(int nodeIndex, double viewportHeight, double maxScroll) {
+    final nodeY = AppConstants.nodeStartY + nodeIndex * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+    final nodeBottom = nodeY + AppConstants.nodeBoxHeight;
+    final targetScroll = nodeBottom - (viewportHeight * AppConstants.scrollTargetRatio);
+    return targetScroll.clamp(0.0, maxScroll);
+  }
+
+  double calculateTotalHeight(int itemCount) {
+    if (itemCount == 0) return AppConstants.minCanvasHeight;
+    return (itemCount * AppConstants.nodeBoxHeight +
+        (itemCount - 1) * CanvasConstants.nodeSpacing +
+        2 * AppConstants.nodeStartY)
+        .clamp(AppConstants.minCanvasHeight, double.infinity);
+  }
+
+  Widget buildNodeWidget(
+      int index,
+      dynamic node,
+      Function(int, int) onNodeTap, {
+        bool showIndex = true,
+        int? displayIndex,
+      }) {
+    final actualIndex = displayIndex ?? index;
+
+    return Container(
+      width: AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing,
+      height: AppConstants.nodeBoxHeight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showIndex) ...[
+            Container(
+              width: CanvasConstants.indexWidth,
+              alignment: Alignment.centerRight,
+              child: Text(
+                actualIndex.toString(),
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: AppConstants.nodeTextSize * 0.7,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: CanvasConstants.indexSpacing),
+          ],
+          GestureDetector(
+            onTap: () => onNodeTap(index, node.value),
+            child: Container(
+              width: AppConstants.nodeBoxWidth,
+              height: AppConstants.nodeBoxHeight,
+              decoration: BoxDecoration(
+                color: _getNodeColor(node.color),
+                borderRadius: BorderRadius.circular(AppConstants.nodeBorderRadius),
+                border: Border.all(
+                  color: AppConstants.defaultNodeColor,
+                  width: AppConstants.nodeBorderWidth,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  node.value.toString(),
+                  style: TextStyle(
+                    color: _getTextColor(node.color),
+                    fontSize: AppConstants.nodeTextSize,
+                    fontWeight: AppConstants.nodeTextWeight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getNodeColor(Color? nodeColor) {
+    return (nodeColor != null && nodeColor != AppConstants.defaultNodeColor)
+        ? nodeColor
+        : Colors.grey[100]!;
+  }
+
+  Color _getTextColor(Color? nodeColor) {
+    return (nodeColor != null && nodeColor != AppConstants.defaultNodeColor)
+        ? Colors.white
+        : Colors.black;
+  }
+}
+
+// Array-specific renderer
+class ArrayRenderer extends DataStructureRenderer {
+  @override
+  Widget buildView(
+      BuildContext context,
+      BaseDataStructure dataStructure,
+      DataStructureInfo dataStructureInfo,
+      AnimationController animationController,
+      ScrollController scrollController,
+      Function(int, int) onNodeTap,
+      ) {
+    final totalHeight = calculateTotalHeight(dataStructure.nodes.length);
+
+    return SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.vertical,
+      child: SizedBox(
+        width: double.infinity,
+        height: totalHeight,
+        child: Stack(
+          children: [
+            CustomPaint(
+              painter: DataStructurePainter(
+                dataStructure: dataStructure,
+                dataStructureInfo: dataStructureInfo,
+                animationValue: animationController.value,
+              ),
+              child: Container(),
+            ),
+            ..._buildNodes(context, dataStructure.nodes, onNodeTap),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildNodes(
+      BuildContext context,
+      List<dynamic> nodes,
+      Function(int, int) onNodeTap,
+      ) {
+    final totalItemWidth = CanvasConstants.indexWidth + CanvasConstants.indexSpacing + AppConstants.nodeBoxWidth;
+    final startX = (MediaQuery.of(context).size.width - totalItemWidth) / 2;
+
+    return List.generate(nodes.length, (index) {
+      final node = nodes[index];
+      final y = AppConstants.nodeStartY + index * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+
+      return Positioned(
+        left: startX,
+        top: y,
+        child: buildNodeWidget(index, node, onNodeTap),
+      );
+    });
+  }
+}
+
+// LinkedList-specific renderer
+class LinkedListRenderer extends DataStructureRenderer {
+  @override
+  Widget buildView(
+      BuildContext context,
+      BaseDataStructure dataStructure,
+      DataStructureInfo dataStructureInfo,
+      AnimationController animationController,
+      ScrollController scrollController,
+      Function(int, int) onNodeTap,
+      ) {
+    final totalHeight = calculateTotalHeight(dataStructure.nodes.length);
+
+    return SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.vertical,
+      child: SizedBox(
+        height: totalHeight,
+        child: Stack(
+          children: [
+            CustomPaint(
+              painter: LinkedListPainter(
+                dataStructure: dataStructure,
+                animationValue: animationController.value,
+                canvasWidth: MediaQuery.of(context).size.width,
+              ),
+              child: Container(),
+            ),
+            ..._buildNodes(context, dataStructure.nodes, onNodeTap),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildNodes(
+      BuildContext context,
+      List<dynamic> nodes,
+      Function(int, int) onNodeTap,
+      ) {
+    final nodeRowWidth = AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing;
+    final startX = (MediaQuery.of(context).size.width - nodeRowWidth) / 2;
+
+    return List.generate(nodes.length, (index) {
+      final node = nodes[index];
+      final y = AppConstants.nodeStartY + index * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+
+      return Positioned(
+        left: startX,
+        top: y,
+        child: buildNodeWidget(index, node, onNodeTap, showIndex: false),
+      );
+    });
+  }
+}
+
+// Stack-specific renderer
+class StackRenderer extends DataStructureRenderer {
+  @override
+  Widget buildView(
+      BuildContext context,
+      BaseDataStructure dataStructure,
+      DataStructureInfo dataStructureInfo,
+      AnimationController animationController,
+      ScrollController scrollController,
+      Function(int, int) onNodeTap,
+      ) {
+    final totalHeight = calculateTotalHeight(dataStructure.nodes.length);
+
+    return SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.vertical,
+      child: SizedBox(
+        width: double.infinity,
+        height: totalHeight,
+        child: Stack(
+          children: [
+            CustomPaint(
+              painter: StackTopArrowPainter(
+                nodeCount: dataStructure.nodes.length,
+                canvasWidth: MediaQuery.of(context).size.width,
+              ),
+              child: Container(),
+            ),
+            ..._buildNodes(context, dataStructure.nodes, onNodeTap),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildNodes(
+      BuildContext context,
+      List<dynamic> nodes,
+      Function(int, int) onNodeTap,
+      ) {
+    final nodeRowWidth = AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing;
+    final startX = (MediaQuery.of(context).size.width - nodeRowWidth) / 2;
+
+    return List.generate(nodes.length, (index) {
+      final node = nodes[index]; // Display nodes[0] at bottom
+      final actualIndex = index;
+      final stackIndex = index; // Stack index: bottom=0, top=length-1
+      final y = AppConstants.nodeStartY + (nodes.length - 1 - index) * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+
+      return Positioned(
+        left: startX,
+        top: y,
+        child: buildNodeWidget(actualIndex, node, onNodeTap, displayIndex: stackIndex),
+      );
+    });
+  }
+}
+
+// Custom Painters with improved performance
 class DataStructurePainter extends CustomPainter {
   final BaseDataStructure dataStructure;
   final DataStructureInfo dataStructureInfo;
@@ -251,28 +484,218 @@ class DataStructurePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    AppLogger.ui('DataStructureCanvas.paint called with ${dataStructure.nodes.length} nodes, current step: ${dataStructure.currentStep}');
-    
+    AppLogger.ui('DataStructureCanvas.paint called with ${dataStructure.nodes.length} nodes');
+
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..color = dataStructureInfo.color;
 
     final nodes = dataStructure.nodes;
-    
-    // Draw connections between nodes (for non-array data structures)
+
+    // Draw connections for non-array data structures
     if (dataStructureInfo.type != DataStructureType.array) {
       for (int i = 0; i < nodes.length - 1; i++) {
         final start = nodes[i].position;
         final end = nodes[i + 1].position;
-        
         canvas.drawLine(start, end, paint);
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant DataStructurePainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.dataStructure.nodes.length != dataStructure.nodes.length;
   }
-} 
+}
+
+class LinkedListPainter extends CustomPainter {
+  final BaseDataStructure dataStructure;
+  final double animationValue;
+  final double canvasWidth;
+
+  LinkedListPainter({
+    required this.dataStructure,
+    required this.animationValue,
+    required this.canvasWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final nodes = dataStructure.nodes;
+    final nodeCount = nodes.length;
+    if (nodeCount == 0) return;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = AppConstants.defaultNodeColor;
+
+    final nodeRowWidth = AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing;
+    final startX = (canvasWidth - nodeRowWidth) / 2;
+
+    _drawHeadArrow(canvas, paint, startX, nodeCount);
+    _drawCurrentArrow(canvas, paint, startX, nodeRowWidth, nodes);
+    _drawNodeConnections(canvas, paint, startX, nodeRowWidth, nodeCount);
+    _drawTailArrow(canvas, paint, startX, nodeCount);
+  }
+
+  void _drawHeadArrow(Canvas canvas, Paint paint, double startX, int nodeCount) {
+    final nodeCenterY = AppConstants.nodeStartY + AppConstants.nodeBoxHeight / 2;
+    final arrowEndX = startX;
+    final arrowStartX = startX - CanvasConstants.arrowOffset;
+
+    _drawHorizontalArrow(canvas, paint, arrowStartX, arrowEndX, nodeCenterY, true);
+    _drawLabel(canvas, 'Head', (arrowStartX + arrowEndX) / 2, nodeCenterY - CanvasConstants.labelOffset, AppConstants.defaultNodeColor);
+  }
+
+  void _drawCurrentArrow(Canvas canvas, Paint paint, double startX, double nodeRowWidth, List<dynamic> nodes) {
+    int activeIndex = 0;
+    for (int i = 0; i < nodes.length; i++) {
+      if (nodes[i].color == AppConstants.currentNodeColor) {
+        activeIndex = i;
+        break;
+      }
+    }
+
+    final activeNodeY = AppConstants.nodeStartY + activeIndex * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+    final currentArrowEndX = startX + nodeRowWidth;
+    final currentArrowStartX = currentArrowEndX + CanvasConstants.arrowOffset;
+    final currentArrowY = activeNodeY + AppConstants.nodeBoxHeight / 2;
+
+    _drawHorizontalArrow(canvas, paint, currentArrowStartX, currentArrowEndX, currentArrowY, false);
+    _drawLabel(canvas, 'current', currentArrowStartX, currentArrowY - CanvasConstants.labelOffset, Colors.orange);
+  }
+
+  void _drawNodeConnections(Canvas canvas, Paint paint, double startX, double nodeRowWidth, int nodeCount) {
+    for (int i = 0; i < nodeCount - 1; i++) {
+      final x = startX + nodeRowWidth / 2;
+      final y1 = AppConstants.nodeStartY + i * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing) + AppConstants.nodeBoxHeight;
+      final y2 = AppConstants.nodeStartY + (i + 1) * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
+
+      canvas.drawLine(Offset(x, y1), Offset(x, y2), paint);
+      _drawVerticalArrowhead(canvas, paint, x, y2);
+    }
+  }
+
+  void _drawTailArrow(Canvas canvas, Paint paint, double startX, int nodeCount) {
+    final nodeCenterY = AppConstants.nodeStartY + (nodeCount - 1) * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing) + AppConstants.nodeBoxHeight / 2;
+    final arrowEndX = startX;
+    final arrowStartX = startX - CanvasConstants.arrowOffset;
+
+    _drawHorizontalArrow(canvas, paint, arrowStartX, arrowEndX, nodeCenterY, true);
+    _drawLabel(canvas, 'Tail', (arrowStartX + arrowEndX) / 2, nodeCenterY + CanvasConstants.labelOffset, AppConstants.defaultNodeColor);
+  }
+
+  void _drawHorizontalArrow(Canvas canvas, Paint paint, double startX, double endX, double y, bool pointingRight) {
+    canvas.drawLine(Offset(startX, y), Offset(endX, y), paint);
+
+    final path = Path();
+    if (pointingRight) {
+      path.moveTo(endX, y);
+      path.lineTo(endX - CanvasConstants.arrowSize, y - CanvasConstants.arrowSize / 2);
+      path.moveTo(endX, y);
+      path.lineTo(endX - CanvasConstants.arrowSize, y + CanvasConstants.arrowSize / 2);
+    } else {
+      path.moveTo(endX, y);
+      path.lineTo(endX + CanvasConstants.arrowSize, y - CanvasConstants.arrowSize / 2);
+      path.moveTo(endX, y);
+      path.lineTo(endX + CanvasConstants.arrowSize, y + CanvasConstants.arrowSize / 2);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawVerticalArrowhead(Canvas canvas, Paint paint, double x, double y) {
+    final path = Path();
+    path.moveTo(x, y);
+    path.lineTo(x - CanvasConstants.arrowSize / 2, y - CanvasConstants.arrowSize);
+    path.moveTo(x, y);
+    path.lineTo(x + CanvasConstants.arrowSize / 2, y - CanvasConstants.arrowSize);
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawLabel(Canvas canvas, String text, double x, double y, Color color) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(x - textPainter.width / 2, y - textPainter.height));
+  }
+
+  @override
+  bool shouldRepaint(covariant LinkedListPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.dataStructure.nodes.length != dataStructure.nodes.length;
+  }
+}
+
+class StackTopArrowPainter extends CustomPainter {
+  final int nodeCount;
+  final double canvasWidth;
+
+  StackTopArrowPainter({
+    required this.nodeCount,
+    required this.canvasWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (nodeCount == 0) return;
+
+    final nodeRowWidth = AppConstants.nodeBoxWidth + CanvasConstants.indexWidth + CanvasConstants.indexSpacing;
+    final startX = (canvasWidth - nodeRowWidth) / 2;
+    final topNodeY = AppConstants.nodeStartY;
+    final arrowStartX = startX + nodeRowWidth + CanvasConstants.topArrowOffset;
+    final arrowEndX = startX + nodeRowWidth;
+    final arrowY = topNodeY + AppConstants.nodeBoxHeight / 2;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = AppConstants.defaultNodeColor;
+
+    // Draw left-pointing arrow
+    canvas.drawLine(Offset(arrowStartX, arrowY), Offset(arrowEndX, arrowY), paint);
+
+    // Draw arrowhead
+    final path = Path();
+    path.moveTo(arrowEndX, arrowY);
+    path.lineTo(arrowEndX + CanvasConstants.arrowSize, arrowY - CanvasConstants.arrowSize / 2);
+    path.moveTo(arrowEndX, arrowY);
+    path.lineTo(arrowEndX + CanvasConstants.arrowSize, arrowY + CanvasConstants.arrowSize / 2);
+    canvas.drawPath(path, paint);
+
+    // Draw 'Top' label
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'Top',
+        style: TextStyle(
+          color: AppConstants.defaultNodeColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    final labelX = arrowStartX + (arrowEndX - arrowStartX) / 2 - textPainter.width / 2;
+    final labelY = arrowY - textPainter.height - CanvasConstants.labelOffset;
+    textPainter.paint(canvas, Offset(labelX, labelY));
+  }
+
+  @override
+  bool shouldRepaint(covariant StackTopArrowPainter oldDelegate) {
+    return oldDelegate.nodeCount != nodeCount;
+  }
+}

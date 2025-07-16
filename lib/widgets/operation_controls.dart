@@ -1,3 +1,6 @@
+// OperationControls: UI and logic for data structure operations panel
+// Shows operation buttons, dialogs, and handles user actions for array, stack, and linked list
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,15 +9,21 @@ import '../models/data_structure_info.dart';
 import '../data_structures/array_data_structure.dart';
 import '../utils/constants.dart';
 import '../utils/logger.dart';
+import '../data_structures/linked_list_data_structure.dart';
+import '../services/operation_controller.dart';
+import '../services/validation_service.dart';
+import '../services/error_handler.dart';
 
+/// Widget for displaying and handling operations for a data structure (array, stack, linked list)
+/// Shows operation chips, dialogs for value input, and handles random data generation
 class OperationControls extends StatefulWidget {
   final BaseDataStructure dataStructure;
   final DataStructureInfo dataStructureInfo;
   final VoidCallback onOperationPerformed;
   final Function(int)? onNodeHighlighted;
   final Function(bool)? onAnimationStateChanged;
-  final VoidCallback? onShowProgress; // new callback
-  final VoidCallback? onHideProgress; // new callback
+  final VoidCallback? onShowProgress; // Callback to show progress bar/hide operations
+  final VoidCallback? onHideProgress; // Callback to hide progress bar/show operations
 
   const OperationControls({
     super.key,
@@ -31,9 +40,11 @@ class OperationControls extends StatefulWidget {
   State<OperationControls> createState() => _OperationControlsState();
 }
 
+// ================== STATE ==================
 class _OperationControlsState extends State<OperationControls> {
-  final TextEditingController _valueController = TextEditingController();
-  String? _selectedOperation;
+  final TextEditingController _valueController = TextEditingController(); // For value input dialogs
+  String? _selectedOperation; // Currently selected operation (for dialogs)
+  final OperationController _operationController = OperationController(); // Business logic controller
 
   @override
   void dispose() {
@@ -41,12 +52,9 @@ class _OperationControlsState extends State<OperationControls> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final operations = widget.dataStructureInfo.operations;
-    final isArray = widget.dataStructureInfo.type == DataStructureType.array;
-
+  // ================== UI BUILDERS ==================
+  /// Build controls for linked list operations (quick chips, add to start/end, random data)
+  Widget _buildLinkedListControls(BuildContext context, ThemeData theme, List<String> operations) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Card(
@@ -64,41 +72,268 @@ class _OperationControlsState extends State<OperationControls> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Only show dropdown for non-array data structures
-                if (!isArray)
-                  SizedBox(
-                    width: double.infinity,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedOperation,
-                      decoration: InputDecoration(
-                        labelText: 'Select Operation',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        prefixIcon: Icon(
-                          Icons.settings,
-                          color: widget.dataStructureInfo.color,
-                        ),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    // Add to Start button
+                    ActionChip(
+                      label: const Text('Add to Start'),
+                      avatar: Icon(
+                        Icons.arrow_upward,
+                        size: 16,
+                        color: widget.dataStructureInfo.color,
                       ),
-                      items: operations.map((operation) {
-                        return DropdownMenuItem(
-                          value: operation,
-                          child: Text(
-                            operation,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedOperation = value;
-                        });
+                      onPressed: () {
+                        _showValueDialog('Add to Start');
                       },
                     ),
+                    // Add to End button (replaces Insert)
+                    ActionChip(
+                      label: const Text('Add to End'),
+                      avatar: Icon(
+                        Icons.arrow_downward,
+                        size: 16,
+                        color: widget.dataStructureInfo.color,
+                      ),
+                      onPressed: () {
+                        _showValueDialog('Add to End');
+                      },
+                    ),
+                    // Other operations as chips
+                    ...operations.where((op) => op != 'Insert').map((operation) {
+                      return ActionChip(
+                        label: Text(operation),
+                        avatar: Icon(
+                          _getOperationIcon(operation),
+                          size: 16,
+                          color: widget.dataStructureInfo.color,
+                        ),
+                        onPressed: () async {
+                          // Handle quick operations and dialogs
+                          if (!_needsValue(operation)) {
+                            if (operation == 'Traverse') {
+                              // Show progress bar, start traverse
+                              if (widget.onShowProgress != null) {
+                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                widget.onShowProgress!();
+                              }
+                              widget.dataStructure.traverse();
+                              setState(() {
+                                widget.dataStructure.goToStep(0);
+                              });
+                              widget.onOperationPerformed();
+                              if (widget.onAnimationStateChanged != null) {
+                                widget.onAnimationStateChanged!(true);
+                              }
+                            } else if (operation == 'Search') {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _showValueDialog(operation);
+                            } else if (operation == 'Delete') {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _showValueDialog(operation);
+                            } else {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            }
+                          } else {
+                            setState(() {
+                              _selectedOperation = operation;
+                            });
+                            _showValueDialog(operation);
+                          }
+                        },
+                      );
+                    }).toList(),
+                    // Generate random data for linked list
+                    ActionChip(
+                      label: const Text('Generate Random Data'),
+                      avatar: Icon(
+                        Icons.shuffle,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      backgroundColor: widget.dataStructureInfo.color,
+                      labelStyle: const TextStyle(color: Colors.white),
+                      onPressed: _showGenerateRandomDialog,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build controls for stack operations (quick chips, random data)
+  Widget _buildStackControls(BuildContext context, ThemeData theme, List<String> operations) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Operations',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                if (!isArray) const SizedBox(height: 12),
-                // Value input (for operations that need a value)
-                if (_selectedOperation != null && _needsValue(_selectedOperation!) && !isArray)
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    // All stack operations as chips
+                    ...operations.map((operation) {
+                      return ActionChip(
+                        label: Text(operation),
+                        avatar: Icon(
+                          _getOperationIcon(operation),
+                          size: 16,
+                          color: widget.dataStructureInfo.color,
+                        ),
+                        onPressed: () async {
+                          // Handle quick operations and dialogs
+                          if (!_needsValue(operation)) {
+                            if (operation == 'Traverse') {
+                              // Show progress bar, start traverse
+                              if (widget.onShowProgress != null) {
+                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                widget.onShowProgress!();
+                              }
+                              widget.dataStructure.traverse();
+                              setState(() {
+                                widget.dataStructure.goToStep(0);
+                              });
+                              widget.onOperationPerformed();
+                              if (widget.onAnimationStateChanged != null) {
+                                widget.onAnimationStateChanged!(true);
+                              }
+                            } else if (operation == 'Peek') {
+                              // Show progress bar, perform peek
+                              if (widget.onShowProgress != null) {
+                                AppLogger.ui('Calling onShowProgress from ActionChip (Peek)');
+                                widget.onShowProgress!();
+                              }
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            } else if (operation == 'Search') {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _showValueDialog(operation);
+                            } else if (operation == 'Delete') {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _showValueDialog(operation);
+                            } else {
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              _executeOperation();
+                            }
+                          } else {
+                            setState(() {
+                              _selectedOperation = operation;
+                            });
+                            _showValueDialog(operation);
+                          }
+                        },
+                      );
+                    }).toList(),
+                    // Generate random data for stack
+                    ActionChip(
+                      label: const Text('Generate Random Data'),
+                      avatar: Icon(
+                        Icons.shuffle,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      backgroundColor: widget.dataStructureInfo.color,
+                      labelStyle: const TextStyle(color: Colors.white),
+                      onPressed: _showGenerateRandomDialog,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build controls for array operations (dropdown, value input, quick chips, random data)
+  Widget _buildArrayControls(BuildContext context, ThemeData theme, List<String> operations) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Operations',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Dropdown for selecting operation
+                SizedBox(
+                  width: double.infinity,
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedOperation,
+                    decoration: InputDecoration(
+                      labelText: 'Select Operation',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.settings,
+                        color: widget.dataStructureInfo.color,
+                      ),
+                    ),
+                    items: operations.map((operation) {
+                      return DropdownMenuItem(
+                        value: operation,
+                        child: Text(
+                          operation,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedOperation = value;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Value input for operations that require a value
+                if (_selectedOperation != null && _needsValue(_selectedOperation!))
                   TextFormField(
                     controller: _valueController,
                     decoration: InputDecoration(
@@ -116,32 +351,8 @@ class _OperationControlsState extends State<OperationControls> {
                       FilteringTextInputFormatter.digitsOnly,
                     ],
                   ),
-                if (!isArray) const SizedBox(height: 12),
-                // Execute button (for non-array)
-                if (_selectedOperation != null && !isArray)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _selectedOperation != null ? _executeOperation : null,
-                      icon: Icon(
-                        _getOperationIcon(_selectedOperation),
-                        color: Colors.white,
-                      ),
-                      label: Text(
-                        _selectedOperation ?? 'Select an operation',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: widget.dataStructureInfo.color,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (!isArray) const SizedBox(height: 12),
-                // Quick operation buttons (always show for array)
+                const SizedBox(height: 12),
+                // Quick operation chips for array
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -155,89 +366,74 @@ class _OperationControlsState extends State<OperationControls> {
                           color: widget.dataStructureInfo.color,
                         ),
                         onPressed: () async {
-                          if (isArray) {
-                            if (!_needsValue(operation)) {
-                              if (operation == 'Traverse') {
-                                // Show progress indicator
-                                if (widget.onShowProgress != null) {
-                                  AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
-                                  widget.onShowProgress!();
-                                }
-                                // Generate animation steps
-                                widget.dataStructure.traverse();
-                                final nodes = widget.dataStructure.nodes;
-                                final steps = widget.dataStructure.animationSteps.length;
-                                AppLogger.operation('Traverse: nodes= nodes.map((n) => n.value).toList()}');
-                                AppLogger.operation('Traverse: steps=$steps');
-                                
-                                // Set to step 0 and update UI
-                                setState(() {
-                                  widget.dataStructure.goToStep(0);
-                                });
-                                widget.onOperationPerformed();
-                                
-                                // Notify parent to start animation
-                                if (widget.onAnimationStateChanged != null) {
-                                  widget.onAnimationStateChanged!(true);
-                                }
-                              } else if (operation == 'Search') {
-                                AppLogger.operation('Search operation selected, showing dialog');
-                                setState(() {
-                                  _selectedOperation = operation;
-                                });
-                                AppLogger.operation('_selectedOperation set to: $_selectedOperation');
-                                // Show dialog for search value
-                                _showValueDialog(operation);
-                              } else if (operation == 'Insert') {
-                                AppLogger.operation('Insert operation selected, showing dialog');
-                                setState(() {
-                                  _selectedOperation = operation;
-                                });
-                                AppLogger.operation('_selectedOperation set to: $_selectedOperation');
-                                // Show dialog for insert value
-                                _showValueDialog(operation);
-                              } else if (operation == 'Delete') {
-                                AppLogger.operation('Delete operation selected, showing dialog');
-                                setState(() {
-                                  _selectedOperation = operation;
-                                });
-                                AppLogger.operation('_selectedOperation set to: $_selectedOperation');
-                                // Show dialog for delete value
-                                _showValueDialog(operation);
-                              } else {
-                                setState(() {
-                                  _selectedOperation = operation;
-                                });
-                                _executeOperation();
+                          // Handle quick operations and dialogs
+                          if (!_needsValue(operation)) {
+                            if (operation == 'Traverse') {
+                              // Show progress bar, start traverse
+                              if (widget.onShowProgress != null) {
+                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                widget.onShowProgress!();
                               }
+                              widget.dataStructure.traverse();
+                              final nodes = widget.dataStructure.nodes;
+                              final steps = widget.dataStructure.animationSteps.length;
+                              AppLogger.operation('Traverse: nodes= nodes.map((n) => n.value).toList()}');
+                              AppLogger.operation('Traverse: steps=$steps');
+                              setState(() {
+                                widget.dataStructure.goToStep(0);
+                              });
+                              widget.onOperationPerformed();
+                              if (widget.onAnimationStateChanged != null) {
+                                widget.onAnimationStateChanged!(true);
+                              }
+                            } else if (operation == 'Search') {
+                              AppLogger.operation('Search operation selected, showing dialog');
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                              _showValueDialog(operation);
+                            } else if (operation == 'Insert') {
+                              AppLogger.operation('Insert operation selected, showing dialog');
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                              _showValueDialog(operation);
+                            } else if (operation == 'Delete') {
+                              AppLogger.operation('Delete operation selected, showing dialog');
+                              setState(() {
+                                _selectedOperation = operation;
+                              });
+                              AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                              _showValueDialog(operation);
                             } else {
                               setState(() {
                                 _selectedOperation = operation;
                               });
-                              _showValueDialog(operation);
+                              _executeOperation();
                             }
                           } else {
                             setState(() {
                               _selectedOperation = operation;
                             });
-                            _executeOperation();
+                            _showValueDialog(operation);
                           }
                         },
                       );
                     }).toList(),
-                    // Generate Data button (for array) - now part of the Wrap
-                    if (isArray)
-                      ActionChip(
-                        label: const Text('Generate Random Data'),
-                        avatar: Icon(
-                          Icons.shuffle,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        backgroundColor: widget.dataStructureInfo.color,
-                        labelStyle: const TextStyle(color: Colors.white),
-                        onPressed: _showGenerateRandomDialog,
+                    // Generate random data for array
+                    ActionChip(
+                      label: const Text('Generate Random Data'),
+                      avatar: Icon(
+                        Icons.shuffle,
+                        size: 16,
+                        color: Colors.white,
                       ),
+                      backgroundColor: widget.dataStructureInfo.color,
+                      labelStyle: const TextStyle(color: Colors.white),
+                      onPressed: _showGenerateRandomDialog,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -249,10 +445,36 @@ class _OperationControlsState extends State<OperationControls> {
     );
   }
 
-  bool _needsValue(String operation) {
-    return ['Insert', 'Delete', 'Search', 'Push', 'Enqueue'].contains(operation);
+  // ================== MAIN BUILD ==================
+  /// Main build method: chooses which controls to show based on data structure type
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final operations = widget.dataStructureInfo.operations;
+    final isArray = widget.dataStructureInfo.type == DataStructureType.array;
+    final isLinkedList = widget.dataStructureInfo.type == DataStructureType.linkedList;
+    final isStack = widget.dataStructureInfo.type == DataStructureType.stack;
+
+    if (isLinkedList) {
+      return _buildLinkedListControls(context, theme, operations);
+    }
+    if (isStack) {
+      return _buildStackControls(context, theme, operations);
+    }
+    if (isArray) {
+      return _buildArrayControls(context, theme, operations);
+    }
+    // Default fallback (should not occur)
+    return const SizedBox.shrink();
   }
 
+  // ================== LOGIC HELPERS ==================
+  /// Returns true if the operation requires a value input
+  bool _needsValue(String operation) {
+    return ['Insert', 'Add to Start', 'Add to End', 'Delete', 'Search', 'Push', 'Enqueue'].contains(operation);
+  }
+
+  /// Returns the icon for a given operation name
   IconData _getOperationIcon(String? operation) {
     switch (operation) {
       case 'Insert':
@@ -276,76 +498,79 @@ class _OperationControlsState extends State<OperationControls> {
     }
   }
 
-  void _executeOperation() {
+  // ================== OPERATION EXECUTION ==================
+  /// Executes the currently selected operation using the operation controller
+  void _executeOperation() async {
     if (_selectedOperation == null) return;
 
-    final value = _needsValue(_selectedOperation!) && _valueController.text.isNotEmpty
-        ? int.tryParse(_valueController.text)
-        : null;
-
-    if (_needsValue(_selectedOperation!) && value == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid number'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+    // Validate input if value is required
+    int? value;
+    if (_operationController.operationRequiresValue(_selectedOperation!)) {
+      if (_valueController.text.isEmpty) {
+        _showErrorMessage('Please enter a valid number');
+        return;
+      }
+      
+      final validation = _operationController.validateInput(_valueController.text);
+      if (!validation.isValid) {
+        _showErrorMessage(validation.errorMessage!);
+        return;
+      }
+      value = validation.parsedValue;
     }
 
     AppLogger.operation('Executing $_selectedOperation with value: $value');
 
-    // Show progress indicator for operations that require it
-    if (['Insert', 'Delete', 'Search', 'Traverse', 'Push', 'Pop', 'Enqueue', 'Dequeue'].contains(_selectedOperation)) {
+    // Show progress bar for operations that need it
+    final progressOperations = ['Add to Start', 'Add to End', 'Delete', 'Search', 'Traverse', 'Push', 'Pop', 'Insert', 'Enqueue', 'Dequeue'];
+    if (progressOperations.contains(_selectedOperation)) {
       AppLogger.ui('Calling onShowProgress from _executeOperation ($_selectedOperation)');
       widget.onShowProgress?.call();
     }
 
-    switch (_selectedOperation) {
-      case 'Insert':
-      case 'Push':
-      case 'Enqueue':
-        if (value != null) {
-          widget.dataStructure.insert(value);
-        }
-        break;
-      case 'Delete':
-      case 'Pop':
-      case 'Dequeue':
-        if (value != null) {
-          widget.dataStructure.delete(value);
-        } else {
-          widget.dataStructure.delete(0); // For operations that don't need a value
-        }
-        break;
-      case 'Search':
-      case 'Peek':
-      case 'Front':
-        if (value != null) {
-          widget.dataStructure.search(value);
-        } else {
-          widget.dataStructure.search(0); // For operations that don't need a value
-        }
-        break;
-      case 'Traverse':
-        widget.dataStructure.traverse();
-        break;
-      case 'IsEmpty':
-        // This would need to be implemented in the data structure
-        break;
+    // Execute operation using controller
+    late OperationResult result;
+    if (widget.dataStructure is LinkedListDataStructure && 
+        (_selectedOperation == 'Add to Start' || _selectedOperation == 'Add to End')) {
+      result = await _operationController.executeLinkedListOperation(
+        operationType: _selectedOperation!,
+        linkedList: widget.dataStructure as LinkedListDataStructure,
+        value: value,
+      );
+    } else {
+      result = await _operationController.executeOperation(
+        operationType: _selectedOperation!,
+        dataStructure: widget.dataStructure,
+        dataStructureInfo: widget.dataStructureInfo,
+        value: value,
+      );
     }
 
-    // Clear the input
-    _valueController.clear();
-    _selectedOperation = null;
+    // Handle result
+    if (!result.isSuccess) {
+      _showErrorMessage(result.message);
+      return;
+    }
 
-    // Notify parent
+    // Reset state after successful operation
+    _valueController.clear();
+    final completedOperation = _selectedOperation;
+    _selectedOperation = null;
     widget.onOperationPerformed();
+    
+    // Auto-start animation for operations that have animation steps
+    if (completedOperation != null && 
+        ['Push', 'Pop', 'Insert', 'Delete', 'Search', 'Add to Start', 'Add to End'].contains(completedOperation)) {
+      if (widget.onAnimationStateChanged != null) {
+        widget.onAnimationStateChanged!(true);
+      }
+    }
   }
 
+  // ================== DIALOG HELPERS ==================
+  /// Shows a dialog for value input for operations that require a value
   void _showValueDialog(String operation) {
     final controller = TextEditingController();
-    
     showDialog(
       context: context,
       builder: (context) {
@@ -381,43 +606,15 @@ class _OperationControlsState extends State<OperationControls> {
               onPressed: () {
                 final value = int.tryParse(controller.text);
                 if (value != null) {
-                  Navigator.of(context).pop();
-                  // Show progress indicator before running the operation
-                  if (widget.onShowProgress != null) {
-                    AppLogger.ui('Calling onShowProgress from dialog Execute ($operation)');
-                    widget.onShowProgress!();
-                  }
-                  // Execute the operation
-                  switch (operation) {
-                    case 'Insert':
-                      widget.dataStructure.insert(value);
-                      break;
-                    case 'Delete':
-                      widget.dataStructure.delete(value);
-                      break;
-                    case 'Search':
-                      widget.dataStructure.search(value);
-                      break;
-                  }
-                  // Set to step 0 and update UI
                   setState(() {
-                    widget.dataStructure.goToStep(0);
+                    _selectedOperation = operation;
+                    _valueController.text = value.toString();
                   });
-                  widget.onOperationPerformed();
-                  // Notify parent to start animation
-                  if (widget.onAnimationStateChanged != null) {
-                    widget.onAnimationStateChanged!(true);
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a valid number'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                  Navigator.of(context).pop();
+                  _executeOperation();
                 }
               },
-              child: const Text('Execute'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -425,53 +622,23 @@ class _OperationControlsState extends State<OperationControls> {
     );
   }
 
+  /// Shows a dialog to confirm random data generation
   void _showGenerateRandomDialog() {
-    final controller = TextEditingController(text: '8');
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Generate Random Data'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Enter the number of items to generate:'),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Number of items',
-                  hintText: 'e.g. 8',
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                autofocus: true,
-              ),
-            ],
-          ),
+          content: const Text('This will replace the current data with random values.'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
-                final count = int.tryParse(controller.text);
-                if (count != null && count > 0) {
-                  Navigator.of(context).pop();
-                  _generateRandomData(count);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a valid number'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                _generateRandomData();
+                Navigator.of(context).pop();
               },
               child: const Text('Generate'),
             ),
@@ -481,15 +648,33 @@ class _OperationControlsState extends State<OperationControls> {
     );
   }
 
-  void _generateRandomData(int count) {
-    final random = Random();
-    final values = List.generate(count, (_) => random.nextInt(100));
-    AppLogger.operation('Generated $count random numbers: $values');
-    if (widget.dataStructure is ArrayDataStructure) {
-      (widget.dataStructure as ArrayDataStructure).addNodesDirectly(values);
-      widget.onOperationPerformed();
-      AppLogger.ui('Calling onHideProgress after generating random data');
-      widget.onHideProgress?.call(); // hide progress after generating data
+  /// Generates random data using the operation controller
+  void _generateRandomData() async {
+    final result = await _operationController.generateRandomData(
+      dataStructure: widget.dataStructure,
+      dataStructureInfo: widget.dataStructureInfo,
+      count: AppConstants.defaultNodeCount,
+      minValue: AppConstants.minNodeValue,
+      maxValue: AppConstants.maxNodeValue,
+    );
+
+    if (!result.isSuccess) {
+      _showErrorMessage(result.message);
+      return;
     }
+
+    setState(() {});
+    widget.onOperationPerformed();
+  }
+
+  /// Shows error message in a snackbar
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 } 

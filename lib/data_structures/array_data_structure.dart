@@ -4,6 +4,9 @@ import '../models/data_structure_node.dart';
 import '../models/animation_step.dart';
 import '../utils/logger.dart';
 import '../utils/constants.dart';
+import '../services/animation_step_builder.dart';
+import '../services/error_handler.dart';
+import '../services/validation_service.dart';
 
 class ArrayDataStructure extends BaseDataStructure {
   final List<int> _data = [];
@@ -11,27 +14,39 @@ class ArrayDataStructure extends BaseDataStructure {
   @override
   void insert(int value) {
     AppLogger.dataStructure('ArrayDataStructure.insert called with value: $value');
-    AppLogger.dataStructure('Current data count before insert: ${_data.length}');
-    final insertIndex = _data.length;
-    clearAnimationSteps();
+    
+    try {
+      // Validate input
+      final validation = ValidationService.validateDataStructureState(
+        nodes: _data,
+        operationType: 'insert',
+      );
+      if (!validation.isValid) {
+        AppLogger.dataStructure('Insert validation failed: ${validation.errorMessage}');
+        return;
+      }
+      
+      AppLogger.dataStructure('Current data count before insert: ${_data.length}');
+      final insertIndex = _data.length;
+      clearAnimationSteps();
 
-    // Step 1: Show current array state
-    final currentNodes = _data
-        .asMap()
-        .entries
-        .map((entry) => DataStructureNode(
-              value: entry.value,
-              position: Offset(50.0 + (entry.key * AppConstants.nodeBoxWidth), AppConstants.nodeStartY),
-              color: AppConstants.defaultNodeColor,
-            ))
-        .toList();
-    addAnimationStep(AnimationStep(
-      description: 'Array Insertion: Step 1 of 3\nAnalyzing current array state (${_data.length} elements)\nPreparing to insert $value at the end (index $insertIndex)\nO(1) operation: Direct insertion at end',
-      code: 'array.add($value)',
-      nodes: currentNodes,
-      highlightedLine: 1,
-      insights: 'Inserting at the end of an array is the most efficient insertion operation. It requires no shifting of existing elements and has O(1) time complexity.',
-    ));
+      // Step 1: Show current array state
+      final currentNodes = AnimationStepBuilder.createPositionedArrayNodes(
+        values: _data,
+        startX: 50.0,
+        startY: AppConstants.nodeStartY,
+        spacing: AppConstants.nodeBoxWidth,
+      ).map((node) => node.copyWith(color: AppConstants.defaultNodeColor)).toList();
+      
+      addAnimationStep(AnimationStepBuilder.buildArrayInsertStep(
+        stepNumber: 1,
+        totalSteps: 3,
+        operationType: 'Array Insertion',
+        nodes: currentNodes,
+        code: 'array.add($value)',
+        customDescription: 'Array Insertion: Step 1 of 3\nAnalyzing current array state (${_data.length} elements)\nPreparing to insert $value at the end (index $insertIndex)\nO(1) operation: Direct insertion at end',
+        insights: 'Inserting at the end of an array is the most efficient insertion operation. It requires no shifting of existing elements and has O(1) time complexity.',
+      ));
     
     // Step 2: Highlight the insertion position
     final highlightNodes = List<DataStructureNode>.from(currentNodes);
@@ -70,31 +85,38 @@ class ArrayDataStructure extends BaseDataStructure {
     // Actually add the value to the true data
     _data.add(value);
 
-    // After operation, set nodes to reflect the true data (for tests and logic)
-    setNodes(_data
-        .asMap()
-        .entries
-        .map((entry) => DataStructureNode(
-              value: entry.value,
-              position: Offset(50.0 + (entry.key * AppConstants.nodeBoxWidth), AppConstants.nodeStartY),
-              color: null,
-            ))
-        .toList());
-    currentStep = 0;
-    AppLogger.dataStructure('Insert completed. Final data count: ${_data.length}');
+      // After operation, set nodes to reflect the true data (for tests and logic)
+      setNodes(AnimationStepBuilder.createPositionedArrayNodes(
+        values: _data,
+        startX: 50.0,
+        startY: AppConstants.nodeStartY,
+        spacing: AppConstants.nodeBoxWidth,
+      ));
+      currentStep = 0;
+      AppLogger.dataStructure('Insert completed. Final data count: ${_data.length}');
+    } catch (e) {
+      final errorMessage = ErrorHandler.handleDataStructureError('Array', 'Insert', e as Exception);
+      AppLogger.dataStructure('Insert error: $errorMessage');
+    }
   }
 
   @override
   void delete(int value) {
     AppLogger.dataStructure('ArrayDataStructure.delete called with value: $value');
-    AppLogger.dataStructure('Current data count: ${_data.length}');
-
-    if (_data.isEmpty) {
-      AppLogger.dataStructure('No data to delete from');
-      return;
-    }
-
-    clearAnimationSteps();
+    
+    try {
+      // Validate input and state
+      final validation = ValidationService.validateDataStructureState(
+        nodes: _data,
+        operationType: 'delete',
+      );
+      if (!validation.isValid) {
+        AppLogger.dataStructure('Delete validation failed: ${validation.errorMessage}');
+        return;
+      }
+      
+      AppLogger.dataStructure('Current data count: ${_data.length}');
+      clearAnimationSteps();
 
     // Step 1: all gray
     final allGray = _data
@@ -196,18 +218,19 @@ class ArrayDataStructure extends BaseDataStructure {
       ));
       AppLogger.dataStructure('Value $value not found in array for deletion');
     }
-    // After operation, set nodes to reflect the true data
-    setNodes(_data
-        .asMap()
-        .entries
-        .map((entry) => DataStructureNode(
-              value: entry.value,
-              position: Offset(50.0 + (entry.key * AppConstants.nodeBoxWidth), AppConstants.nodeStartY),
-              color: null,
-            ))
-        .toList());
-    currentStep = 0;
-    AppLogger.dataStructure('Delete completed. Final data count: ${_data.length}');
+      // After operation, set nodes to reflect the true data
+      setNodes(AnimationStepBuilder.createPositionedArrayNodes(
+        values: _data,
+        startX: 50.0,
+        startY: AppConstants.nodeStartY,
+        spacing: AppConstants.nodeBoxWidth,
+      ));
+      currentStep = 0;
+      AppLogger.dataStructure('Delete completed. Final data count: ${_data.length}');
+    } catch (e) {
+      final errorMessage = ErrorHandler.handleDataStructureError('Array', 'Delete', e as Exception);
+      AppLogger.dataStructure('Delete error: $errorMessage');
+    }
   }
 
   @override
