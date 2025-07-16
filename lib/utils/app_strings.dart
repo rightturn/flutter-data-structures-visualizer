@@ -32,7 +32,6 @@ class AppStrings {
   static const String frontOperation = 'Front';
   static const String addToStartOperation = 'Add to Start';
   static const String addToEndOperation = 'Add to End';
-  static const String isEmptyOperation = 'IsEmpty';
 
   // Data Structure Names
   static const String arrayStructure = 'Array';

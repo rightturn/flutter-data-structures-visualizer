@@ -224,7 +224,6 @@ class OperationExecutor {
       'Dequeue',
       'Peek',
       'Front',
-      'IsEmpty',
     ];
   }
 }

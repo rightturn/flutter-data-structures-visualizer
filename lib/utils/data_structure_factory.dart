@@ -35,7 +35,7 @@ class DataStructureFactory {
       description: 'A LIFO (Last In, First Out) data structure where elements are added and removed from the top.',
       icon: Icons.layers,
       color: Colors.orange,
-      operations: ['Push', 'Pop', 'Peek', 'IsEmpty'],
+      operations: ['Push', 'Pop', 'Peek'],
     ),
     DataStructureInfo(
       type: DataStructureType.queue,

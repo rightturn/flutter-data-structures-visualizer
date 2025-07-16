@@ -491,8 +491,6 @@ class _OperationControlsState extends State<OperationControls> {
         return Icons.search;
       case 'Traverse':
         return Icons.list;
-      case 'IsEmpty':
-        return Icons.check_box_outline_blank;
       default:
         return Icons.settings;
     }
@@ -549,6 +547,11 @@ class _OperationControlsState extends State<OperationControls> {
     // Handle result
     if (!result.isSuccess) {
       _showErrorMessage(result.message);
+      // Restore operations section when operation fails
+      if (widget.onHideProgress != null) {
+        AppLogger.ui('Calling onHideProgress due to operation failure');
+        widget.onHideProgress!();
+      }
       return;
     }
 
