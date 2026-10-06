@@ -27,10 +27,7 @@ class DataStructuresApp extends StatelessWidget {
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const HomeScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
     GoRoute(
       path: '/data-structure/:type',
       builder: (context, state) {
@@ -39,4 +36,4 @@ final _router = GoRouter(
       },
     ),
   ],
-); 
+);

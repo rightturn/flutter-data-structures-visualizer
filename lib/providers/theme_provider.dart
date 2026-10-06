@@ -42,4 +42,4 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
         break;
     }
   }
-} 
+}

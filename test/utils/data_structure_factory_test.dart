@@ -65,15 +65,33 @@ void main() {
 
     group('createDataStructure', () {
       test('createDataStructure creates correct instance for each type', () {
-        final array = DataStructureFactory.createDataStructure(DataStructureType.array);
-        final linkedList = DataStructureFactory.createDataStructure(DataStructureType.linkedList);
-        final stack = DataStructureFactory.createDataStructure(DataStructureType.stack);
-        final queue = DataStructureFactory.createDataStructure(DataStructureType.queue);
-        final binaryTree = DataStructureFactory.createDataStructure(DataStructureType.binaryTree);
-        final binarySearchTree = DataStructureFactory.createDataStructure(DataStructureType.binarySearchTree);
-        final minHeap = DataStructureFactory.createDataStructure(DataStructureType.minHeap);
-        final maxHeap = DataStructureFactory.createDataStructure(DataStructureType.maxHeap);
-        final graph = DataStructureFactory.createDataStructure(DataStructureType.graph);
+        final array = DataStructureFactory.createDataStructure(
+          DataStructureType.array,
+        );
+        final linkedList = DataStructureFactory.createDataStructure(
+          DataStructureType.linkedList,
+        );
+        final stack = DataStructureFactory.createDataStructure(
+          DataStructureType.stack,
+        );
+        final queue = DataStructureFactory.createDataStructure(
+          DataStructureType.queue,
+        );
+        final binaryTree = DataStructureFactory.createDataStructure(
+          DataStructureType.binaryTree,
+        );
+        final binarySearchTree = DataStructureFactory.createDataStructure(
+          DataStructureType.binarySearchTree,
+        );
+        final minHeap = DataStructureFactory.createDataStructure(
+          DataStructureType.minHeap,
+        );
+        final maxHeap = DataStructureFactory.createDataStructure(
+          DataStructureType.maxHeap,
+        );
+        final graph = DataStructureFactory.createDataStructure(
+          DataStructureType.graph,
+        );
 
         expect(array, isA<ArrayDataStructure>());
         expect(linkedList, isA<LinkedListDataStructure>());
@@ -96,49 +114,125 @@ void main() {
 
     group('getTypeString', () {
       test('getTypeString returns correct string for each type', () {
-        expect(DataStructureFactory.getTypeString(DataStructureType.array), 'array');
-        expect(DataStructureFactory.getTypeString(DataStructureType.linkedList), 'linkedList');
-        expect(DataStructureFactory.getTypeString(DataStructureType.stack), 'stack');
-        expect(DataStructureFactory.getTypeString(DataStructureType.queue), 'queue');
-        expect(DataStructureFactory.getTypeString(DataStructureType.binaryTree), 'binaryTree');
-        expect(DataStructureFactory.getTypeString(DataStructureType.binarySearchTree), 'binarySearchTree');
-        expect(DataStructureFactory.getTypeString(DataStructureType.minHeap), 'minHeap');
-        expect(DataStructureFactory.getTypeString(DataStructureType.maxHeap), 'maxHeap');
-        expect(DataStructureFactory.getTypeString(DataStructureType.graph), 'graph');
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.array),
+          'array',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.linkedList),
+          'linkedList',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.stack),
+          'stack',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.queue),
+          'queue',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.binaryTree),
+          'binaryTree',
+        );
+        expect(
+          DataStructureFactory.getTypeString(
+            DataStructureType.binarySearchTree,
+          ),
+          'binarySearchTree',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.minHeap),
+          'minHeap',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.maxHeap),
+          'maxHeap',
+        );
+        expect(
+          DataStructureFactory.getTypeString(DataStructureType.graph),
+          'graph',
+        );
       });
     });
 
     group('getTypeFromString', () {
       test('getTypeFromString returns correct type for each string', () {
-        expect(DataStructureFactory.getTypeFromString('array'), DataStructureType.array);
-        expect(DataStructureFactory.getTypeFromString('linkedList'), DataStructureType.linkedList);
-        expect(DataStructureFactory.getTypeFromString('stack'), DataStructureType.stack);
-        expect(DataStructureFactory.getTypeFromString('queue'), DataStructureType.queue);
-        expect(DataStructureFactory.getTypeFromString('binaryTree'), DataStructureType.binaryTree);
-        expect(DataStructureFactory.getTypeFromString('binarySearchTree'), DataStructureType.binarySearchTree);
-        expect(DataStructureFactory.getTypeFromString('minHeap'), DataStructureType.minHeap);
-        expect(DataStructureFactory.getTypeFromString('maxHeap'), DataStructureType.maxHeap);
-        expect(DataStructureFactory.getTypeFromString('graph'), DataStructureType.graph);
+        expect(
+          DataStructureFactory.getTypeFromString('array'),
+          DataStructureType.array,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('linkedList'),
+          DataStructureType.linkedList,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('stack'),
+          DataStructureType.stack,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('queue'),
+          DataStructureType.queue,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('binaryTree'),
+          DataStructureType.binaryTree,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('binarySearchTree'),
+          DataStructureType.binarySearchTree,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('minHeap'),
+          DataStructureType.minHeap,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('maxHeap'),
+          DataStructureType.maxHeap,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('graph'),
+          DataStructureType.graph,
+        );
       });
 
       test('getTypeFromString returns array for invalid string', () {
-        expect(DataStructureFactory.getTypeFromString('invalid'), DataStructureType.array);
-        expect(DataStructureFactory.getTypeFromString(''), DataStructureType.array);
-        expect(DataStructureFactory.getTypeFromString('random'), DataStructureType.array);
+        expect(
+          DataStructureFactory.getTypeFromString('invalid'),
+          DataStructureType.array,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString(''),
+          DataStructureType.array,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('random'),
+          DataStructureType.array,
+        );
       });
 
       test('getTypeFromString is case sensitive', () {
-        expect(DataStructureFactory.getTypeFromString('Array'), DataStructureType.array);
-        expect(DataStructureFactory.getTypeFromString('ARRAY'), DataStructureType.array);
-        expect(DataStructureFactory.getTypeFromString('array'), DataStructureType.array);
+        expect(
+          DataStructureFactory.getTypeFromString('Array'),
+          DataStructureType.array,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('ARRAY'),
+          DataStructureType.array,
+        );
+        expect(
+          DataStructureFactory.getTypeFromString('array'),
+          DataStructureType.array,
+        );
       });
     });
 
     group('dataStructures list', () {
       test('dataStructures list contains all types', () {
-        final types = DataStructureFactory.dataStructures.map((ds) => ds.type).toSet();
+        final types = DataStructureFactory.dataStructures
+            .map((ds) => ds.type)
+            .toSet();
         expect(types.length, DataStructureType.values.length);
-        
+
         for (final type in DataStructureType.values) {
           expect(types.contains(type), true);
         }
@@ -155,7 +249,9 @@ void main() {
       });
 
       test('dataStructures list has unique types', () {
-        final types = DataStructureFactory.dataStructures.map((ds) => ds.type).toList();
+        final types = DataStructureFactory.dataStructures
+            .map((ds) => ds.type)
+            .toList();
         final uniqueTypes = types.toSet();
         expect(types.length, uniqueTypes.length);
       });
@@ -166,7 +262,7 @@ void main() {
         for (final type in DataStructureType.values) {
           final info = DataStructureFactory.getInfo(type);
           final dataStructure = DataStructureFactory.createDataStructure(type);
-          
+
           expect(info.type, type);
           expect(dataStructure, isA<BaseDataStructure>());
         }
@@ -175,7 +271,9 @@ void main() {
       test('getTypeString and getTypeFromString are inverse operations', () {
         for (final type in DataStructureType.values) {
           final typeString = DataStructureFactory.getTypeString(type);
-          final convertedType = DataStructureFactory.getTypeFromString(typeString);
+          final convertedType = DataStructureFactory.getTypeFromString(
+            typeString,
+          );
           expect(convertedType, type);
         }
       });
@@ -184,7 +282,7 @@ void main() {
         for (final type in DataStructureType.values) {
           final info = DataStructureFactory.getInfo(type);
           final dataStructure = DataStructureFactory.createDataStructure(type);
-          
+
           // Both should be valid and not null
           expect(info, isNotNull);
           expect(dataStructure, isNotNull);
@@ -192,4 +290,4 @@ void main() {
       });
     });
   });
-} 
+}

@@ -19,7 +19,7 @@ class AnimationService {
 
   bool get isPlaying => _isPlaying;
 
-  void startAnimation(BaseDataStructure dataStructure) {
+  void startAnimation(BaseDataStructure dataStructure, {double speed = 1.0}) {
     if (dataStructure.animationSteps.isEmpty) {
       AppLogger.warning('No animation steps available');
       return;
@@ -27,11 +27,15 @@ class AnimationService {
 
     _isPlaying = true;
     onAnimationStateChanged?.call();
-    
-    _animationTimer = Timer.periodic(AppConstants.animationDuration, (timer) {
+
+    final interval = Duration(
+      milliseconds: (AppConstants.animationDuration.inMilliseconds / speed)
+          .round(),
+    );
+    _animationTimer = Timer.periodic(interval, (timer) {
       _onTick(dataStructure);
     });
-    
+
     AppLogger.animation('Animation started');
   }
 
@@ -68,4 +72,4 @@ class AnimationService {
     _isPlaying = false;
     _animationTimer?.cancel();
   }
-} 
+}

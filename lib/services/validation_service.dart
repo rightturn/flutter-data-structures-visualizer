@@ -13,25 +13,27 @@ class ValidationResult {
   });
 
   ValidationResult.success(int value)
-      : isValid = true,
-        errorMessage = null,
-        parsedValue = value;
+    : isValid = true,
+      errorMessage = null,
+      parsedValue = value;
 
   ValidationResult.error(String message)
-      : isValid = false,
-        errorMessage = message,
-        parsedValue = null;
+    : isValid = false,
+      errorMessage = message,
+      parsedValue = null;
 }
 
 /// Service for validating user inputs and operation parameters
 class ValidationService {
   static const int minValue = 1;
   static const int maxValue = 999;
-  static const int maxLength = 50;
+  static const int maxLength = 100;
 
   /// Validates numeric input for data structure operations
   static ValidationResult validateNumericInput(String input) {
-    AppLogger.dataStructure('ValidationService: Validating numeric input: "$input"');
+    AppLogger.dataStructure(
+      'ValidationService: Validating numeric input: "$input"',
+    );
 
     if (input.trim().isEmpty) {
       return ValidationResult.error('Input cannot be empty');
@@ -50,7 +52,9 @@ class ValidationService {
 
     // Check range
     if (parsedValue < minValue || parsedValue > maxValue) {
-      return ValidationResult.error('Value must be between $minValue and $maxValue');
+      return ValidationResult.error(
+        'Value must be between $minValue and $maxValue',
+      );
     }
 
     AppLogger.dataStructure('ValidationService: Valid input: $parsedValue');
@@ -58,15 +62,24 @@ class ValidationService {
   }
 
   /// Validates operation type for data structures
-  static bool validateOperationType(String operationType, List<String> supportedOperations) {
-    AppLogger.dataStructure('ValidationService: Validating operation: $operationType');
-    
+  static bool validateOperationType(
+    String operationType,
+    List<String> supportedOperations,
+  ) {
+    AppLogger.dataStructure(
+      'ValidationService: Validating operation: $operationType',
+    );
+
     final isValid = supportedOperations.contains(operationType);
     if (!isValid) {
-      AppLogger.dataStructure('ValidationService: Invalid operation: $operationType');
-      AppLogger.dataStructure('ValidationService: Supported operations: $supportedOperations');
+      AppLogger.dataStructure(
+        'ValidationService: Invalid operation: $operationType',
+      );
+      AppLogger.dataStructure(
+        'ValidationService: Supported operations: $supportedOperations',
+      );
     }
-    
+
     return isValid;
   }
 
@@ -75,7 +88,9 @@ class ValidationService {
     required List<dynamic> nodes,
     required String operationType,
   }) {
-    AppLogger.dataStructure('ValidationService: Validating data structure state for $operationType');
+    AppLogger.dataStructure(
+      'ValidationService: Validating data structure state for $operationType',
+    );
 
     switch (operationType.toLowerCase()) {
       case 'delete':
@@ -85,16 +100,29 @@ class ValidationService {
       case 'dequeue':
       case 'peek':
       case 'front':
+      case 'remove vertex':
+      case 'extract min':
+      case 'extract max':
+      case 'peek min':
+      case 'peek max':
+      case 'heapify':
+      case 'bfs':
+      case 'dfs':
         if (nodes.isEmpty) {
-          return ValidationResult.error('Cannot perform $operationType on empty structure');
+          return ValidationResult.error(
+            'Cannot perform $operationType on empty structure',
+          );
         }
         break;
-      
+
       case 'insert':
       case 'push':
       case 'enqueue':
+      case 'add vertex':
         if (nodes.length >= maxLength) {
-          return ValidationResult.error('Structure is full (max $maxLength elements)');
+          return ValidationResult.error(
+            'Structure is full (max $maxLength elements)',
+          );
         }
         break;
     }
@@ -104,14 +132,18 @@ class ValidationService {
 
   /// Validates array index for operations
   static ValidationResult validateArrayIndex(int index, int arrayLength) {
-    AppLogger.dataStructure('ValidationService: Validating array index: $index (length: $arrayLength)');
+    AppLogger.dataStructure(
+      'ValidationService: Validating array index: $index (length: $arrayLength)',
+    );
 
     if (arrayLength == 0) {
       return ValidationResult.error('Array is empty');
     }
 
     if (index < 0 || index >= arrayLength) {
-      return ValidationResult.error('Index must be between 0 and ${arrayLength - 1}');
+      return ValidationResult.error(
+        'Index must be between 0 and ${arrayLength - 1}',
+      );
     }
 
     return ValidationResult.success(index);
@@ -123,7 +155,9 @@ class ValidationService {
     required int minValue,
     required int maxValue,
   }) {
-    AppLogger.dataStructure('ValidationService: Validating random data params: count=$count, min=$minValue, max=$maxValue');
+    AppLogger.dataStructure(
+      'ValidationService: Validating random data params: count=$count, min=$minValue, max=$maxValue',
+    );
 
     if (count <= 0) {
       return ValidationResult.error('Count must be greater than 0');
@@ -134,11 +168,16 @@ class ValidationService {
     }
 
     if (minValue >= maxValue) {
-      return ValidationResult.error('Minimum value must be less than maximum value');
+      return ValidationResult.error(
+        'Minimum value must be less than maximum value',
+      );
     }
 
-    if (minValue < ValidationService.minValue || maxValue > ValidationService.maxValue) {
-      return ValidationResult.error('Values must be between ${ValidationService.minValue} and ${ValidationService.maxValue}');
+    if (minValue < ValidationService.minValue ||
+        maxValue > ValidationService.maxValue) {
+      return ValidationResult.error(
+        'Values must be between ${ValidationService.minValue} and ${ValidationService.maxValue}',
+      );
     }
 
     return ValidationResult.success(count);
@@ -146,7 +185,9 @@ class ValidationService {
 
   /// Validates search value exists in data structure
   static ValidationResult validateSearchValue(int searchValue, List<int> data) {
-    AppLogger.dataStructure('ValidationService: Validating search value: $searchValue in data: $data');
+    AppLogger.dataStructure(
+      'ValidationService: Validating search value: $searchValue in data: $data',
+    );
 
     if (data.isEmpty) {
       return ValidationResult.error('Cannot search in empty structure');
@@ -155,7 +196,9 @@ class ValidationService {
     // Note: We don't validate if the value exists, as that's part of the search algorithm
     // Just validate the search value is in acceptable range
     if (searchValue < minValue || searchValue > maxValue) {
-      return ValidationResult.error('Search value must be between $minValue and $maxValue');
+      return ValidationResult.error(
+        'Search value must be between $minValue and $maxValue',
+      );
     }
 
     return ValidationResult.success(searchValue);

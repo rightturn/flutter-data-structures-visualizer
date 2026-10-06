@@ -16,7 +16,8 @@ class DataStructureFactory {
     DataStructureInfo(
       type: DataStructureType.array,
       name: 'Arrays',
-      description: 'A collection of elements stored at contiguous memory locations.',
+      description:
+          'A collection of elements stored at contiguous memory locations.',
       icon: Icons.view_array,
       color: Colors.blue,
       operations: ['Insert', 'Delete', 'Search', 'Traverse'],
@@ -24,7 +25,8 @@ class DataStructureFactory {
     DataStructureInfo(
       type: DataStructureType.linkedList,
       name: 'Linked Lists',
-      description: 'A linear data structure where elements are stored in nodes with references to the next node.',
+      description:
+          'A linear data structure where elements are stored in nodes with references to the next node.',
       icon: Icons.link,
       color: Colors.green,
       operations: ['Insert', 'Delete', 'Search', 'Traverse'],
@@ -32,15 +34,17 @@ class DataStructureFactory {
     DataStructureInfo(
       type: DataStructureType.stack,
       name: 'Stacks',
-      description: 'A LIFO (Last In, First Out) data structure where elements are added and removed from the top.',
+      description:
+          'A LIFO (Last In, First Out) data structure where elements are added and removed from the top.',
       icon: Icons.layers,
       color: Colors.orange,
-      operations: ['Push', 'Pop', 'Peek'],
+      operations: ['Push', 'Pop', 'Peek', 'IsEmpty'],
     ),
     DataStructureInfo(
       type: DataStructureType.queue,
       name: 'Queues',
-      description: 'A FIFO (First In, First Out) data structure where elements are added at the rear and removed from the front.',
+      description:
+          'A FIFO (First In, First Out) data structure where elements are added at the rear and removed from the front.',
       icon: Icons.queue,
       color: Colors.purple,
       operations: ['Enqueue', 'Dequeue', 'Front', 'IsEmpty'],
@@ -48,7 +52,8 @@ class DataStructureFactory {
     DataStructureInfo(
       type: DataStructureType.binaryTree,
       name: 'Binary Trees',
-      description: 'A hierarchical data structure where each node has at most two children.',
+      description:
+          'A hierarchical data structure where each node has at most two children.',
       icon: Icons.account_tree,
       color: Colors.teal,
       operations: ['Insert', 'Delete', 'Search', 'Traverse'],
@@ -56,7 +61,8 @@ class DataStructureFactory {
     DataStructureInfo(
       type: DataStructureType.binarySearchTree,
       name: 'Binary Search Trees',
-      description: 'A binary tree where the left subtree contains nodes with values less than the parent node.',
+      description:
+          'A binary tree where the left subtree contains nodes with values less than the parent node.',
       icon: Icons.search,
       color: Colors.indigo,
       operations: ['Insert', 'Delete', 'Search', 'Traverse'],
@@ -64,26 +70,29 @@ class DataStructureFactory {
     DataStructureInfo(
       type: DataStructureType.minHeap,
       name: 'Min Heaps',
-      description: 'A complete binary tree where the parent node is always smaller than or equal to its children.',
+      description:
+          'A complete binary tree where the parent node is always smaller than or equal to its children.',
       icon: Icons.trending_down,
       color: Colors.red,
-      operations: ['Insert', 'Extract Min', 'Heapify', 'Build Heap'],
+      operations: ['Insert', 'Extract Min', 'Peek Min', 'Heapify'],
     ),
     DataStructureInfo(
       type: DataStructureType.maxHeap,
       name: 'Max Heaps',
-      description: 'A complete binary tree where the parent node is always larger than or equal to its children.',
+      description:
+          'A complete binary tree where the parent node is always larger than or equal to its children.',
       icon: Icons.trending_up,
       color: Colors.amber,
-      operations: ['Insert', 'Extract Max', 'Heapify', 'Build Heap'],
+      operations: ['Insert', 'Extract Max', 'Peek Max', 'Heapify'],
     ),
     DataStructureInfo(
       type: DataStructureType.graph,
       name: 'Graphs',
-      description: 'A collection of vertices connected by edges, representing relationships between objects.',
+      description:
+          'A collection of vertices connected by edges, representing relationships between objects.',
       icon: Icons.grain,
       color: Colors.pink,
-      operations: ['Add Vertex', 'Add Edge', 'DFS', 'BFS'],
+      operations: ['Add Vertex', 'Add Edge', 'Remove Vertex', 'DFS', 'BFS'],
     ),
   ];
 
@@ -161,4 +170,4 @@ class DataStructureFactory {
         return DataStructureType.array;
     }
   }
-} 
+}

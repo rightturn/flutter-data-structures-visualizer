@@ -6,7 +6,9 @@ import 'package:data_structures/utils/data_structure_factory.dart';
 
 void main() {
   group('HomeScreen', () {
-    testWidgets('HomeScreen displays data structure cards', (WidgetTester tester) async {
+    testWidgets('HomeScreen displays data structure cards', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that data structures are displayed (only Arrays and Linked Lists are implemented)
@@ -14,15 +16,27 @@ void main() {
       expect(find.text('Linked Lists'), findsOneWidget);
     });
 
-    testWidgets('data structure cards show correct information', (WidgetTester tester) async {
+    testWidgets('data structure cards show correct information', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check specific data structure information
       expect(find.text('Arrays'), findsOneWidget);
-      expect(find.text('A collection of elements stored at contiguous memory locations.'), findsOneWidget);
+      expect(
+        find.text(
+          'A collection of elements stored at contiguous memory locations.',
+        ),
+        findsOneWidget,
+      );
 
       expect(find.text('Linked Lists'), findsOneWidget);
-      expect(find.text('A linear data structure where elements are stored in nodes with references to the next node.'), findsOneWidget);
+      expect(
+        find.text(
+          'A linear data structure where elements are stored in nodes with references to the next node.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('app bar displays correct title', (WidgetTester tester) async {
@@ -32,14 +46,23 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('header section displays correct text', (WidgetTester tester) async {
+    testWidgets('header section displays correct text', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       expect(find.text('Choose a Data Structure'), findsOneWidget);
-      expect(find.text('Select a data structure to visualize its operations and algorithms'), findsOneWidget);
+      expect(
+        find.text(
+          'Select a data structure to visualize its operations and algorithms',
+        ),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('grid layout adapts to different screen sizes', (WidgetTester tester) async {
+    testWidgets('grid layout adapts to different screen sizes', (
+      WidgetTester tester,
+    ) async {
       // Test with small screen
       tester.binding.window.physicalSizeTestValue = const Size(400, 800);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
@@ -56,7 +79,9 @@ void main() {
       tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
-    testWidgets('data structure cards have correct styling', (WidgetTester tester) async {
+    testWidgets('data structure cards have correct styling', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that cards are present
@@ -73,7 +98,9 @@ void main() {
       expect(arrayCard, findsOneWidget);
     });
 
-    testWidgets('data structure cards are interactive', (WidgetTester tester) async {
+    testWidgets('data structure cards are interactive', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Find and tap on the Arrays card
@@ -87,7 +114,9 @@ void main() {
       expect(tester.widget<Card>(arrayCard).child, isNotNull);
     });
 
-    testWidgets('grid has correct layout properties', (WidgetTester tester) async {
+    testWidgets('grid has correct layout properties', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that GridView is present
@@ -95,7 +124,10 @@ void main() {
 
       // Check that the grid has the correct delegate
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      expect(gridView.gridDelegate, isA<SliverGridDelegateWithFixedCrossAxisCount>());
+      expect(
+        gridView.gridDelegate,
+        isA<SliverGridDelegateWithFixedCrossAxisCount>(),
+      );
     });
 
     testWidgets('screen has proper padding', (WidgetTester tester) async {
@@ -112,7 +144,9 @@ void main() {
       expect(padding, findsOneWidget);
     });
 
-    testWidgets('data structure cards display operations', (WidgetTester tester) async {
+    testWidgets('data structure cards display operations', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that operation information is displayed
@@ -121,22 +155,30 @@ void main() {
       expect(find.text('Delete'), findsWidgets);
     });
 
-    testWidgets('screen handles empty data structure list', (WidgetTester tester) async {
+    testWidgets('screen handles empty data structure list', (
+      WidgetTester tester,
+    ) async {
       // This test would require mocking the DataStructureFactory
       // For now, we'll test that the screen renders without crashing
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
       expect(find.byType(HomeScreen), findsOneWidget);
     });
 
-    testWidgets('screen handles implemented data structures', (WidgetTester tester) async {
+    testWidgets('screen handles implemented data structures', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that implemented data structures are rendered
-      // Only Arrays and Linked Lists are currently implemented
-      expect(find.byType(Card), findsNWidgets(2));
+      expect(
+        find.byType(Card),
+        findsNWidgets(DataStructureFactory.dataStructures.length),
+      );
     });
 
-    testWidgets('data structure cards have consistent styling', (WidgetTester tester) async {
+    testWidgets('data structure cards have consistent styling', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that all cards have similar structure
@@ -157,19 +199,19 @@ void main() {
       expect(linkedListCard, findsOneWidget);
     });
 
-    testWidgets('screen is responsive to theme changes', (WidgetTester tester) async {
+    testWidgets('screen is responsive to theme changes', (
+      WidgetTester tester,
+    ) async {
       // Test with light theme
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData.light(),
-        home: const HomeScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(theme: ThemeData.light(), home: const HomeScreen()),
+      );
       expect(find.byType(HomeScreen), findsOneWidget);
 
       // Test with dark theme
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData.dark(),
-        home: const HomeScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(theme: ThemeData.dark(), home: const HomeScreen()),
+      );
       expect(find.byType(HomeScreen), findsOneWidget);
     });
 
@@ -181,14 +223,18 @@ void main() {
       expect(find.text('Linked Lists'), findsOneWidget);
     });
 
-    testWidgets('screen has proper scroll behavior', (WidgetTester tester) async {
+    testWidgets('screen has proper scroll behavior', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that GridView is scrollable
       expect(find.byType(GridView), findsOneWidget);
     });
 
-    testWidgets('data structure cards have proper spacing', (WidgetTester tester) async {
+    testWidgets('data structure cards have proper spacing', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that spacing widgets are present
@@ -199,31 +245,34 @@ void main() {
       expect(spacingWidgets, findsWidgets);
     });
 
-    testWidgets('screen handles different text scales', (WidgetTester tester) async {
+    testWidgets('screen handles different text scales', (
+      WidgetTester tester,
+    ) async {
       // Test with different text scales
-      await tester.pumpWidget(MaterialApp(
-        home: const HomeScreen(),
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.5),
-            child: child!,
-          );
-        },
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const HomeScreen(),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.5),
+              child: child!,
+            );
+          },
+        ),
+      );
 
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.text('Choose a Data Structure'), findsOneWidget);
     });
 
-    testWidgets('data structure cards display icons correctly', (WidgetTester tester) async {
+    testWidgets('data structure cards display icons correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that icons are displayed for each data structure
       final arrayIcon = find.descendant(
-        of: find.ancestor(
-          of: find.text('Arrays'),
-          matching: find.byType(Card),
-        ),
+        of: find.ancestor(of: find.text('Arrays'), matching: find.byType(Card)),
         matching: find.byType(Icon),
       );
       expect(arrayIcon, findsOneWidget);
@@ -238,7 +287,9 @@ void main() {
       expect(linkedListIcon, findsOneWidget);
     });
 
-    testWidgets('screen handles orientation changes', (WidgetTester tester) async {
+    testWidgets('screen handles orientation changes', (
+      WidgetTester tester,
+    ) async {
       // Test in portrait mode
       tester.binding.window.physicalSizeTestValue = const Size(400, 800);
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
@@ -253,7 +304,9 @@ void main() {
       tester.binding.window.clearPhysicalSizeTestValue();
     });
 
-    testWidgets('cards have proper elevation and shape', (WidgetTester tester) async {
+    testWidgets('cards have proper elevation and shape', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       final cards = find.byType(Card);
@@ -267,22 +320,26 @@ void main() {
       }
     });
 
-    testWidgets('cards have InkWell for tap feedback', (WidgetTester tester) async {
+    testWidgets('cards have InkWell for tap feedback', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that InkWell is present for tap feedback
       expect(find.byType(InkWell), findsWidgets);
     });
 
-    testWidgets('operations are displayed as chips', (WidgetTester tester) async {
+    testWidgets('operations are displayed as chips', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
       // Check that operations are displayed in containers with borders
       expect(find.byType(Container), findsWidgets);
-      
+
       // Look for operation text
       expect(find.text('Insert'), findsWidgets);
       expect(find.text('Delete'), findsWidgets);
     });
   });
-} 
+}

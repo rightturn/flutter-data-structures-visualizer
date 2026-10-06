@@ -36,10 +36,12 @@ class DataStructureNode {
       color: color == _unset ? this.color : color as Color?,
       position: position ?? this.position,
       children: children == _unset
-        ? this.children
-        : (children == null ? <DataStructureNode>[] : children as List<DataStructureNode>),
+          ? this.children
+          : (children == null
+                ? <DataStructureNode>[]
+                : children as List<DataStructureNode>),
       next: next == _unset ? this.next : next as DataStructureNode?,
       prev: prev == _unset ? this.prev : prev as DataStructureNode?,
     );
   }
-} 
+}

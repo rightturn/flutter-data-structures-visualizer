@@ -15,55 +15,61 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Text(
-              'Choose a Data Structure',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose a Data Structure',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Select a data structure to visualize its operations and algorithms',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
+              const SizedBox(height: 8),
+              Text(
+                'Select a data structure to visualize its operations and algorithms',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
               ),
-            ),
-            const SizedBox(height: 32),
-            // Data structure grid
-            Expanded(
-              child: GridView.builder(
+              const SizedBox(height: 32),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                  crossAxisCount: MediaQuery.of(context).size.width > 600
+                      ? 3
+                      : 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 0.85,
                 ),
                 itemCount: DataStructureFactory.dataStructures.length,
                 itemBuilder: (context, index) {
-                  final dataStructure = DataStructureFactory.dataStructures[index];
+                  final dataStructure =
+                      DataStructureFactory.dataStructures[index];
                   return _buildDataStructureCard(context, dataStructure);
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDataStructureCard(BuildContext context, DataStructureInfo dataStructure) {
+  Widget _buildDataStructureCard(
+    BuildContext context,
+    DataStructureInfo dataStructure,
+  ) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          final typeString = DataStructureFactory.getTypeString(dataStructure.type);
+          final typeString = DataStructureFactory.getTypeString(
+            dataStructure.type,
+          );
           context.go('/data-structure/$typeString');
         },
         borderRadius: BorderRadius.circular(12),
@@ -116,7 +122,10 @@ class HomeScreen extends StatelessWidget {
                   runSpacing: 2,
                   children: dataStructure.operations.take(2).map((operation) {
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: dataStructure.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
@@ -142,4 +151,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

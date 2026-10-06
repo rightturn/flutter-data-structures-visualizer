@@ -14,13 +14,11 @@ import '../widgets/learning_panel.dart';
 class DataStructureScreen extends ConsumerStatefulWidget {
   final String dataStructureType;
 
-  const DataStructureScreen({
-    super.key,
-    required this.dataStructureType,
-  });
+  const DataStructureScreen({super.key, required this.dataStructureType});
 
   @override
-  ConsumerState<DataStructureScreen> createState() => _DataStructureScreenState();
+  ConsumerState<DataStructureScreen> createState() =>
+      _DataStructureScreenState();
 }
 
 class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
@@ -30,9 +28,11 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
   late DataStructureInfo _dataStructureInfo;
   late AnimationController _animationController;
   late AnimationService _animationService;
-  final GlobalKey<DataStructureCanvasState> _canvasKey = GlobalKey<DataStructureCanvasState>();
+  final GlobalKey<DataStructureCanvasState> _canvasKey =
+      GlobalKey<DataStructureCanvasState>();
   bool _isPlaying = false;
   bool _showProgressIndicator = false;
+  double _playbackSpeed = 1.0;
 
   // ================== PUBLIC METHODS (LIFECYCLE, BUILD) ==================
   @override
@@ -41,7 +41,9 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
     _dataStructureInfo = DataStructureFactory.getInfo(
       DataStructureFactory.getTypeFromString(widget.dataStructureType),
     );
-    _dataStructure = DataStructureFactory.createDataStructure(_dataStructureInfo.type);
+    _dataStructure = DataStructureFactory.createDataStructure(
+      _dataStructureInfo.type,
+    );
     _animationController = AnimationController(
       duration: AppConstants.stepDuration,
       vsync: this,
@@ -86,9 +88,7 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => Scaffold(
-                    appBar: AppBar(
-                      title: const Text('Learning Mode'),
-                    ),
+                    appBar: AppBar(title: const Text('Learning Mode')),
                     body: LearningPanel(
                       dataStructure: _dataStructure,
                       dataStructureInfo: _dataStructureInfo,
@@ -109,57 +109,92 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
           }
         },
       ),
-      bottomNavigationBar: _buildAnimationControls(hasAnimation, currentStep, totalSteps),
+      bottomNavigationBar: _buildAnimationControls(
+        hasAnimation,
+        currentStep,
+        totalSteps,
+      ),
     );
   }
 
   // ================== PRIVATE METHODS (HELPERS, UI BUILDERS, LOGIC) ==================
   // --- Animation/Progress Logic ---
   void _showProgress() {
-    AppLogger.ui('Setting _showProgressIndicator = true (showing progress indicator, hiding operations section)');
-    setState(() { _showProgressIndicator = true; });
+    AppLogger.ui(
+      'Setting _showProgressIndicator = true (showing progress indicator, hiding operations section)',
+    );
+    setState(() {
+      _showProgressIndicator = true;
+    });
   }
+
   void _hideProgress() {
-    AppLogger.ui('Setting _showProgressIndicator = false (hiding progress indicator, showing operations section)');
-    setState(() { _showProgressIndicator = false; });
+    AppLogger.ui(
+      'Setting _showProgressIndicator = false (hiding progress indicator, showing operations section)',
+    );
+    setState(() {
+      _showProgressIndicator = false;
+    });
   }
+
   void _onStepChanged() {
     setState(() {}); // Force rebuild
     _scrollToHighlightedNode();
   }
+
   void _onAnimationComplete() {
-    setState(() { _isPlaying = false; });
+    setState(() {
+      _isPlaying = false;
+    });
     AppLogger.animation('Animation completed');
   }
+
   void _onAnimationStateChanged() {
-    setState(() { _isPlaying = _animationService.isPlaying; });
+    setState(() {
+      _isPlaying = _animationService.isPlaying;
+    });
   }
+
   void _onAnimationStateChangedFromControls(bool isPlaying) {
     if (isPlaying) {
-      _animationService.startAnimation(_dataStructure);
+      _animationService.startAnimation(_dataStructure, speed: _playbackSpeed);
     } else {
       _animationService.pauseAnimation();
     }
   }
+
   void _togglePlayPause() {
     if (_isPlaying) {
       _animationService.pauseAnimation();
     } else {
-      _animationService.startAnimation(_dataStructure);
+      _animationService.startAnimation(_dataStructure, speed: _playbackSpeed);
     }
   }
+
   void _goToPreviousStep() {
-    setState(() { _dataStructure.previousStep(); _isPlaying = false; });
+    setState(() {
+      _dataStructure.previousStep();
+      _isPlaying = false;
+    });
     _scrollToHighlightedNode();
   }
+
   void _goToNextStep() {
-    setState(() { _dataStructure.nextStep(); _isPlaying = false; });
+    setState(() {
+      _dataStructure.nextStep();
+      _isPlaying = false;
+    });
     _scrollToHighlightedNode();
   }
+
   void _onSliderChanged(double value) {
-    setState(() { _dataStructure.goToStep(value.toInt()); _isPlaying = false; });
+    setState(() {
+      _dataStructure.goToStep(value.toInt());
+      _isPlaying = false;
+    });
     _scrollToHighlightedNode();
   }
+
   void _resetToDefault() {
     setState(() {
       _isPlaying = false;
@@ -173,15 +208,23 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
     final nodes = _dataStructure.nodes;
     int nodeToScrollTo = -1;
     for (int j = 0; j < nodes.length; j++) {
-      if (nodes[j].color == AppConstants.currentNodeColor) { nodeToScrollTo = j; break; }
+      if (nodes[j].color == AppConstants.currentNodeColor) {
+        nodeToScrollTo = j;
+        break;
+      }
     }
     if (nodeToScrollTo == -1) {
       for (int j = 0; j < nodes.length; j++) {
-        if (nodes[j].color == AppConstants.foundNodeColor) { nodeToScrollTo = j; break; }
+        if (nodes[j].color == AppConstants.foundNodeColor) {
+          nodeToScrollTo = j;
+          break;
+        }
       }
     }
     if (nodeToScrollTo != -1) {
-      AppLogger.ui('Scrolling to node $nodeToScrollTo with color ${nodes[nodeToScrollTo].color}');
+      AppLogger.ui(
+        'Scrolling to node $nodeToScrollTo with color ${nodes[nodeToScrollTo].color}',
+      );
       _canvasKey.currentState?.scrollToNode(nodeToScrollTo);
     }
   }
@@ -190,9 +233,16 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
   IconData _getStepIcon(String description) {
     final lower = description.toLowerCase();
     if (lower.contains('search')) return Icons.search;
-    if (lower.contains('insert') || lower.contains('push') || lower.contains('enqueue')) return Icons.add_circle_outline;
-    if (lower.contains('delete') || lower.contains('pop') || lower.contains('dequeue')) return Icons.remove_circle_outline;
-    if (lower.contains('traverse') || lower.contains('visit')) return Icons.list_alt;
+    if (lower.contains('insert') ||
+        lower.contains('push') ||
+        lower.contains('enqueue'))
+      return Icons.add_circle_outline;
+    if (lower.contains('delete') ||
+        lower.contains('pop') ||
+        lower.contains('dequeue'))
+      return Icons.remove_circle_outline;
+    if (lower.contains('traverse') || lower.contains('visit'))
+      return Icons.list_alt;
     if (lower.contains('found')) return Icons.check_circle_outline;
     if (lower.contains('not found')) return Icons.cancel_outlined;
     if (lower.contains('compare')) return Icons.compare_arrows;
@@ -200,19 +250,28 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
     if (lower.contains('move')) return Icons.arrow_forward;
     return Icons.info_outline;
   }
-  TextStyle _tableLabelStyle(BuildContext context) => Theme.of(context).textTheme.labelLarge!.copyWith(
-    color: Theme.of(context).colorScheme.primary,
-    fontWeight: FontWeight.bold,
-  );
-  TextStyle _tableValueStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!.copyWith(
-    fontWeight: FontWeight.w600,
-  );
+
+  TextStyle _tableLabelStyle(BuildContext context) =>
+      Theme.of(context).textTheme.labelLarge!.copyWith(
+        color: Theme.of(context).colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      );
+  TextStyle _tableValueStyle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600);
   String _getStepAction(String description) {
     final lower = description.toLowerCase();
     if (lower.contains('search')) return 'Search';
-    if (lower.contains('insert') || lower.contains('push') || lower.contains('enqueue')) return 'Insert';
-    if (lower.contains('delete') || lower.contains('pop') || lower.contains('dequeue')) return 'Delete';
-    if (lower.contains('traverse') || lower.contains('visit')) return 'Traverse';
+    if (lower.contains('insert') ||
+        lower.contains('push') ||
+        lower.contains('enqueue'))
+      return 'Insert';
+    if (lower.contains('delete') ||
+        lower.contains('pop') ||
+        lower.contains('dequeue'))
+      return 'Delete';
+    if (lower.contains('traverse') || lower.contains('visit'))
+      return 'Traverse';
     if (lower.contains('found')) return 'Found';
     if (lower.contains('not found')) return 'Not Found';
     if (lower.contains('compare')) return 'Compare';
@@ -232,8 +291,12 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
             dataStructure: _dataStructure,
             animationController: _animationController,
             dataStructureInfo: _dataStructureInfo,
-            onNodeHighlighted: (index) { AppLogger.ui('Node highlighted: $index'); },
-            onNodeUpdated: () { setState(() {}); },
+            onNodeHighlighted: (index) {
+              AppLogger.ui('Node highlighted: $index');
+            },
+            onNodeUpdated: () {
+              setState(() {});
+            },
           ),
         ),
         if (_showProgressIndicator)
@@ -246,7 +309,9 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
               child: OperationControls(
                 dataStructure: _dataStructure,
                 dataStructureInfo: _dataStructureInfo,
-                onOperationPerformed: () { setState(() {}); },
+                onOperationPerformed: () {
+                  setState(() {});
+                },
                 onAnimationStateChanged: _onAnimationStateChangedFromControls,
                 onShowProgress: _showProgress,
                 onHideProgress: _hideProgress,
@@ -267,8 +332,12 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
             dataStructure: _dataStructure,
             animationController: _animationController,
             dataStructureInfo: _dataStructureInfo,
-            onNodeHighlighted: (index) { AppLogger.ui('Node highlighted: $index'); },
-            onNodeUpdated: () { setState(() {}); },
+            onNodeHighlighted: (index) {
+              AppLogger.ui('Node highlighted: $index');
+            },
+            onNodeUpdated: () {
+              setState(() {});
+            },
           ),
         ),
         if (_showProgressIndicator)
@@ -281,7 +350,9 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
               child: OperationControls(
                 dataStructure: _dataStructure,
                 dataStructureInfo: _dataStructureInfo,
-                onOperationPerformed: () { setState(() {}); },
+                onOperationPerformed: () {
+                  setState(() {});
+                },
                 onAnimationStateChanged: _onAnimationStateChangedFromControls,
                 onShowProgress: _showProgress,
                 onHideProgress: _hideProgress,
@@ -292,7 +363,11 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
     );
   }
 
-  Widget _buildAnimationControls(bool hasAnimation, int currentStep, int totalSteps) {
+  Widget _buildAnimationControls(
+    bool hasAnimation,
+    int currentStep,
+    int totalSteps,
+  ) {
     if (!hasAnimation) return const SizedBox.shrink();
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -303,14 +378,24 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
             child: Card(
               color: Theme.of(context).colorScheme.surfaceVariant,
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 20,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(_getStepIcon(_dataStructure.animationSteps[currentStep].description),
-                        color: Theme.of(context).colorScheme.primary, size: 32),
+                    Icon(
+                      _getStepIcon(
+                        _dataStructure.animationSteps[currentStep].description,
+                      ),
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 32,
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Table(
@@ -318,20 +403,45 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
                           0: IntrinsicColumnWidth(),
                           1: FlexColumnWidth(),
                         },
-                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
                         children: [
-                          TableRow(children: [
-                            Text('Step:', style: _tableLabelStyle(context)),
-                            Text('${currentStep + 1} of $totalSteps', style: _tableValueStyle(context)),
-                          ]),
-                          TableRow(children: [
-                            Text('Action:', style: _tableLabelStyle(context)),
-                            Text(_getStepAction(_dataStructure.animationSteps[currentStep].description), style: _tableValueStyle(context)),
-                          ]),
-                          TableRow(children: [
-                            Text('Details:', style: _tableLabelStyle(context)),
-                            Text(_dataStructure.animationSteps[currentStep].description, style: _tableValueStyle(context)),
-                          ]),
+                          TableRow(
+                            children: [
+                              Text('Step:', style: _tableLabelStyle(context)),
+                              Text(
+                                '${currentStep + 1} of $totalSteps',
+                                style: _tableValueStyle(context),
+                              ),
+                            ],
+                          ),
+                          TableRow(
+                            children: [
+                              Text('Action:', style: _tableLabelStyle(context)),
+                              Text(
+                                _getStepAction(
+                                  _dataStructure
+                                      .animationSteps[currentStep]
+                                      .description,
+                                ),
+                                style: _tableValueStyle(context),
+                              ),
+                            ],
+                          ),
+                          TableRow(
+                            children: [
+                              Text(
+                                'Details:',
+                                style: _tableLabelStyle(context),
+                              ),
+                              Text(
+                                _dataStructure
+                                    .animationSteps[currentStep]
+                                    .description,
+                                style: _tableValueStyle(context),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -350,15 +460,44 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
                 value: currentStep.toDouble(),
                 min: 0,
                 max: (totalSteps - 1).toDouble(),
-                divisions: totalSteps - 1,
+                divisions: totalSteps > 1 ? totalSteps - 1 : null,
                 onChanged: _onSliderChanged,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.speed, size: 18),
+                  const SizedBox(width: 8),
+                  DropdownButton<double>(
+                    value: _playbackSpeed,
+                    items: const [
+                      DropdownMenuItem(value: 0.5, child: Text('0.5×')),
+                      DropdownMenuItem(value: 1.0, child: Text('1×')),
+                      DropdownMenuItem(value: 1.5, child: Text('1.5×')),
+                      DropdownMenuItem(value: 2.0, child: Text('2×')),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => _playbackSpeed = value);
+                      if (_isPlaying) {
+                        _animationService.pauseAnimation();
+                        _animationService.startAnimation(
+                          _dataStructure,
+                          speed: _playbackSpeed,
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
               // Control buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   IconButton(
-                    onPressed: _dataStructure.isAtStart ? null : _goToPreviousStep,
+                    onPressed: _dataStructure.isAtStart
+                        ? null
+                        : _goToPreviousStep,
                     icon: const Icon(Icons.skip_previous),
                     tooltip: 'Previous Step',
                   ),
@@ -385,4 +524,4 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
       ],
     );
   }
-} 
+}

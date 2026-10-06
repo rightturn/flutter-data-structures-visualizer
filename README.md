@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Flutter](https://img.shields.io/badge/Flutter-3.8+-blue.svg?style=flat-square&logo=flutter)
+![Flutter](https://img.shields.io/badge/Flutter-3.32+-blue.svg?style=flat-square&logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.0+-blue.svg?style=flat-square&logo=dart)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-lightgrey.svg?style=flat-square)
@@ -36,20 +36,20 @@ Ever struggled to understand how a stack grows or how linked lists connect? This
 - **Step-by-step progression** lets you follow along at your own pace
 - **Interactive controls** to play, pause, and navigate through operations
 
-### 📊 **Complete Data Structure Library**
+### 📊 **Data Structure Library**
 | Data Structure | Operations | Special Features |
 |---|---|---|
 | **Arrays** | Insert, Delete, Search, Traverse | Index-based access visualization |
-| **Stacks** | Push, Pop, Peek, Traverse | LIFO principle with proper growth |
 | **Linked Lists** | Add to Start/End, Delete, Search | Node connections and pointers |
+| **Stacks** | Push, Pop, Peek, Traverse | LIFO principle with proper growth |
+| **Queues** | Enqueue, Dequeue, Front, Traverse | FIFO principle visualization |
 | **Binary Trees** | Insert, Delete, Traverse | Tree structure with branches |
-| **Graphs** | Add Node/Edge, Traverse | Network visualizations |
-| **Heaps** | Insert, Extract, Heapify | Priority queue operations |
-| **Queues** | Enqueue, Dequeue, Peek | FIFO principle visualization |
+| **Binary Search Trees** | Insert, Delete, Search, In-order Traverse | Ordered tree navigation |
+| **Graphs** | Add/Remove Vertex, Add Edge, BFS, DFS | Undirected network visualizations |
+| **Min/Max Heaps** | Insert, Extract, Peek, Heapify | Priority queue operations |
 
 ### 🎮 **Interactive Learning**
-- **Tap to edit** node values directly on the canvas
-- **Drag and drop** for intuitive data manipulation
+- **Tap to edit** array values directly on the canvas
 - **Real-time feedback** with operation explanations
 - **Time complexity insights** for each operation
 
@@ -82,8 +82,8 @@ Ever struggled to understand how a stack grows or how linked lists connect? This
 
 | Category | Technology |
 |---|---|
-| **Framework** | Flutter 3.8+ |
-| **Language** | Dart 3.0+ |
+| **Framework** | Flutter 3.32+ |
+| **Language** | Dart 3.8+ |
 | **State Management** | Riverpod 2.5+ |
 | **Navigation** | GoRouter 14.6+ |
 | **Architecture** | Clean Architecture |
@@ -96,24 +96,24 @@ Ever struggled to understand how a stack grows or how linked lists connect? This
 
 ## 📱 Screenshots
 
-> *Coming soon! Screenshots will showcase the beautiful interface and smooth animations.*
+Screenshots are not yet included. Run the application locally to explore the interactive views.
 
 ---
 
 ## 🏗️ Installation
 
 ### Prerequisites
-- Flutter SDK (3.8 or later)
+- Flutter SDK (3.32 or later)
 - Dart SDK (3.0 or later)
 - Android Studio / VS Code with Flutter extensions
 
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/flutter-data-structures-visualizer.git
+git clone git@github.com:rightturn/flutter-ds-visualizer.git
 
 # Navigate to project directory
-cd flutter-data-structures-visualizer
+cd flutter-ds-visualizer
 
 # Install dependencies
 flutter pub get
@@ -176,13 +176,16 @@ flutter test
 flutter test --coverage
 
 # Run specific test file
-flutter test test/data_structures/stack_test.dart
+flutter test test/data_structures/stack_data_structure_test.dart
+
+# Run the end-to-end application flow on a connected device
+flutter test integration_test/app_test.dart
 ```
 
 ### Test Coverage
-- **Unit Tests**: Core data structure logic
-- **Widget Tests**: UI component testing
-- **Integration Tests**: End-to-end user flows
+- **Unit tests**: Core structures, models, services, constants, and providers
+- **Widget tests**: Home screen, operation controls, canvas, and learning panel
+- **Integration test**: Launch, navigation, and array insertion flow
 
 ---
 
@@ -263,8 +266,7 @@ If this project helped you learn data structures, please consider:
 
 **Have questions or suggestions?**
 
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/yourusername/flutter-data-structures-visualizer/issues)
-[![Email](https://img.shields.io/badge/Email-Contact-blue?style=for-the-badge&logo=gmail)](mailto:your.email@example.com)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/rightturn/flutter-ds-visualizer/issues)
 
 </div>
 

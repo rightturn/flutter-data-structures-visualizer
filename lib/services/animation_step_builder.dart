@@ -20,12 +20,14 @@ class AnimationStepBuilder {
     String? insights,
     int highlightedLine = 1,
   }) {
-    final description = customDescription ?? _getDefaultInsertDescription(
-      stepNumber: stepNumber,
-      totalSteps: totalSteps,
-      operationType: operationType,
-      dataStructureType: _arrayPrefix,
-    );
+    final description =
+        customDescription ??
+        _getDefaultInsertDescription(
+          stepNumber: stepNumber,
+          totalSteps: totalSteps,
+          operationType: operationType,
+          dataStructureType: _arrayPrefix,
+        );
 
     return AnimationStep(
       description: description,
@@ -47,12 +49,14 @@ class AnimationStepBuilder {
     String? insights,
     int highlightedLine = 1,
   }) {
-    final description = customDescription ?? _getDefaultSearchDescription(
-      stepNumber: stepNumber,
-      totalSteps: totalSteps,
-      searchValue: searchValue,
-      dataStructureType: _arrayPrefix,
-    );
+    final description =
+        customDescription ??
+        _getDefaultSearchDescription(
+          stepNumber: stepNumber,
+          totalSteps: totalSteps,
+          searchValue: searchValue,
+          dataStructureType: _arrayPrefix,
+        );
 
     return AnimationStep(
       description: description,
@@ -74,12 +78,14 @@ class AnimationStepBuilder {
     String? insights,
     int highlightedLine = 1,
   }) {
-    final description = customDescription ?? _getDefaultDeleteDescription(
-      stepNumber: stepNumber,
-      totalSteps: totalSteps,
-      deleteValue: deleteValue,
-      dataStructureType: _arrayPrefix,
-    );
+    final description =
+        customDescription ??
+        _getDefaultDeleteDescription(
+          stepNumber: stepNumber,
+          totalSteps: totalSteps,
+          deleteValue: deleteValue,
+          dataStructureType: _arrayPrefix,
+        );
 
     return AnimationStep(
       description: description,
@@ -100,11 +106,13 @@ class AnimationStepBuilder {
     String? insights,
     int highlightedLine = 1,
   }) {
-    final description = customDescription ?? _getDefaultTraversalDescription(
-      stepNumber: stepNumber,
-      totalSteps: totalSteps,
-      dataStructureType: _arrayPrefix,
-    );
+    final description =
+        customDescription ??
+        _getDefaultTraversalDescription(
+          stepNumber: stepNumber,
+          totalSteps: totalSteps,
+          dataStructureType: _arrayPrefix,
+        );
 
     return AnimationStep(
       description: description,
@@ -126,11 +134,13 @@ class AnimationStepBuilder {
     String? insights,
     int highlightedLine = 1,
   }) {
-    final description = customDescription ?? _getDefaultLinkedListDescription(
-      stepNumber: stepNumber,
-      totalSteps: totalSteps,
-      operationType: operationType,
-    );
+    final description =
+        customDescription ??
+        _getDefaultLinkedListDescription(
+          stepNumber: stepNumber,
+          totalSteps: totalSteps,
+          operationType: operationType,
+        );
 
     return AnimationStep(
       description: description,

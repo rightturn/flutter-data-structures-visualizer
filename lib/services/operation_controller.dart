@@ -4,6 +4,7 @@ import '../models/base_data_structure.dart';
 import '../models/data_structure_info.dart';
 import '../data_structures/linked_list_data_structure.dart';
 import '../data_structures/array_data_structure.dart';
+import '../data_structures/graph_data_structure.dart';
 import '../utils/logger.dart';
 import 'operation_strategies.dart';
 import 'validation_service.dart';
@@ -12,7 +13,7 @@ import 'validation_service.dart';
 /// Separates business logic from UI components
 class OperationController {
   final OperationExecutor _operationExecutor = OperationExecutor();
-  
+
   /// Executes an operation with validation and error handling
   Future<OperationResult> executeOperation({
     required String operationType,
@@ -34,8 +35,13 @@ class OperationController {
       }
 
       // Validate value if required
-      if (_operationExecutor.getValueRequiredOperations().contains(operationType) && value == null) {
-        return OperationResult.error('Operation $operationType requires a value');
+      if (_operationExecutor.getValueRequiredOperations().contains(
+            operationType,
+          ) &&
+          value == null) {
+        return OperationResult.error(
+          'Operation $operationType requires a value',
+        );
       }
 
       // Execute the operation
@@ -51,7 +57,9 @@ class OperationController {
         return OperationResult.error('Failed to execute $operationType');
       }
     } catch (e) {
-      AppLogger.dataStructure('OperationController: Error executing $operationType: $e');
+      AppLogger.dataStructure(
+        'OperationController: Error executing $operationType: $e',
+      );
       return OperationResult.error('Error: ${e.toString()}');
     }
   }
@@ -62,7 +70,9 @@ class OperationController {
     required LinkedListDataStructure linkedList,
     int? value,
   }) async {
-    AppLogger.dataStructure('OperationController: Executing linked list $operationType');
+    AppLogger.dataStructure(
+      'OperationController: Executing linked list $operationType',
+    );
 
     try {
       switch (operationType) {
@@ -96,9 +106,24 @@ class OperationController {
           );
       }
     } catch (e) {
-      AppLogger.dataStructure('OperationController: Error in linked list operation: $e');
+      AppLogger.dataStructure(
+        'OperationController: Error in linked list operation: $e',
+      );
       return OperationResult.error('Error: ${e.toString()}');
     }
+  }
+
+  Future<OperationResult> addGraphEdge({
+    required GraphDataStructure graph,
+    required int from,
+    required int to,
+  }) async {
+    final added = graph.addEdge(from, to);
+    return added
+        ? OperationResult.success('Added edge $from ↔ $to')
+        : OperationResult.error(
+            'Both vertices must exist and the edge must be new',
+          );
   }
 
   /// Generates random data for data structures
@@ -137,13 +162,13 @@ class OperationController {
             dataStructure.addNodesDirectly(values);
           }
           break;
-        
+
         case DataStructureType.linkedList:
           if (dataStructure is LinkedListDataStructure) {
             dataStructure.addNodesDirectly(values);
           }
           break;
-        
+
         case DataStructureType.stack:
           dataStructure.reset();
           for (final value in values) {
@@ -151,7 +176,7 @@ class OperationController {
           }
           dataStructure.clearAnimationSteps();
           break;
-        
+
         case DataStructureType.queue:
           dataStructure.reset();
           for (final value in values) {
@@ -159,15 +184,24 @@ class OperationController {
           }
           dataStructure.clearAnimationSteps();
           break;
-        
+
         default:
-          return OperationResult.error('Random data generation not supported for this data structure');
+          dataStructure.reset();
+          for (final value in values) {
+            dataStructure.insert(value);
+          }
+          dataStructure.clearAnimationSteps();
+          break;
       }
 
       return OperationResult.success('Generated $count random values');
     } catch (e) {
-      AppLogger.dataStructure('OperationController: Error generating random data: $e');
-      return OperationResult.error('Error generating random data: ${e.toString()}');
+      AppLogger.dataStructure(
+        'OperationController: Error generating random data: $e',
+      );
+      return OperationResult.error(
+        'Error generating random data: ${e.toString()}',
+      );
     }
   }
 
@@ -205,12 +239,12 @@ class OperationResult {
   });
 
   OperationResult.success(String message, {dynamic data})
-      : isSuccess = true,
-        message = message,
-        data = data;
+    : isSuccess = true,
+      message = message,
+      data = data;
 
   OperationResult.error(String message)
-      : isSuccess = false,
-        message = message,
-        data = null;
+    : isSuccess = false,
+      message = message,
+      data = null;
 }

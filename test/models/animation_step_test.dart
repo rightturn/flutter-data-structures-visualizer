@@ -42,8 +42,12 @@ void main() {
     });
 
     test('AnimationStep equality comparison', () {
-      final nodes1 = [DataStructureNode(value: 1, position: const Offset(0, 0))];
-      final nodes2 = [DataStructureNode(value: 1, position: const Offset(0, 0))];
+      final nodes1 = [
+        DataStructureNode(value: 1, position: const Offset(0, 0)),
+      ];
+      final nodes2 = [
+        DataStructureNode(value: 1, position: const Offset(0, 0)),
+      ];
 
       final step1 = AnimationStep(
         description: 'Test step',
@@ -78,7 +82,9 @@ void main() {
     });
 
     test('AnimationStep equality with different properties', () {
-      final baseNodes = [DataStructureNode(value: 1, position: const Offset(0, 0))];
+      final baseNodes = [
+        DataStructureNode(value: 1, position: const Offset(0, 0)),
+      ];
       final baseStep = AnimationStep(
         description: 'Base step',
         code: 'base()',
@@ -119,9 +125,15 @@ void main() {
         insights: 'Different insights',
       );
 
-      expect(baseStep.description, isNot(equals(differentDescription.description)));
+      expect(
+        baseStep.description,
+        isNot(equals(differentDescription.description)),
+      );
       expect(baseStep.code, isNot(equals(differentCode.code)));
-      expect(baseStep.highlightedLine, isNot(equals(differentLine.highlightedLine)));
+      expect(
+        baseStep.highlightedLine,
+        isNot(equals(differentLine.highlightedLine)),
+      );
       expect(baseStep.insights, isNot(equals(differentInsights.insights)));
     });
 
@@ -137,12 +149,15 @@ void main() {
     });
 
     test('AnimationStep with null nodes handles gracefully', () {
-      expect(() => AnimationStep(
-        description: 'Test step',
-        code: 'test()',
-        nodes: [],
-        highlightedLine: 1,
-      ), returnsNormally);
+      expect(
+        () => AnimationStep(
+          description: 'Test step',
+          code: 'test()',
+          nodes: [],
+          highlightedLine: 1,
+        ),
+        returnsNormally,
+      );
     });
 
     test('AnimationStep with negative highlighted line', () {
@@ -207,7 +222,9 @@ void main() {
           position: const Offset(0, 0),
           color: Colors.red,
           label: 'Node 1',
-          children: [DataStructureNode(value: 2, position: const Offset(10, 10))],
+          children: [
+            DataStructureNode(value: 2, position: const Offset(10, 10)),
+          ],
           next: DataStructureNode(value: 3, position: const Offset(20, 20)),
           prev: DataStructureNode(value: 0, position: const Offset(-10, -10)),
         ),
@@ -248,4 +265,4 @@ void main() {
       expect(string, contains('AnimationStep'));
     });
   });
-} 
+}

@@ -32,10 +32,7 @@ class LearningPanel extends StatelessWidget {
                 // Header
                 Row(
                   children: [
-                    Icon(
-                      Icons.school,
-                      color: dataStructureInfo.color,
-                    ),
+                    Icon(Icons.school, color: dataStructureInfo.color),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -49,7 +46,7 @@ class LearningPanel extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Step counter and algorithm info
                 if (hasAnimation) ...[
                   Row(
@@ -63,12 +60,17 @@ class LearningPanel extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: dataStructureInfo.color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: dataStructureInfo.color.withValues(alpha: 0.3),
+                            color: dataStructureInfo.color.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                         child: Text(
@@ -83,14 +85,15 @@ class LearningPanel extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Current step description
                 if (hasAnimation && currentStep < totalSteps) ...[
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -111,7 +114,10 @@ class LearningPanel extends StatelessWidget {
                           dataStructure.animationSteps[currentStep].description,
                           style: theme.textTheme.bodyMedium,
                         ),
-                        if (dataStructure.animationSteps[currentStep].insights.isNotEmpty) ...[
+                        if (dataStructure
+                            .animationSteps[currentStep]
+                            .insights
+                            .isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.all(8),
@@ -132,7 +138,9 @@ class LearningPanel extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    dataStructure.animationSteps[currentStep].insights,
+                                    dataStructure
+                                        .animationSteps[currentStep]
+                                        .insights,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: Colors.blue[700],
                                       fontStyle: FontStyle.italic,
@@ -148,7 +156,7 @@ class LearningPanel extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Code snippet
                 if (hasAnimation && currentStep < totalSteps) ...[
                   Container(
@@ -181,13 +189,15 @@ class LearningPanel extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 // Color legend
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -208,19 +218,39 @@ class LearningPanel extends StatelessWidget {
                         spacing: 12,
                         runSpacing: 6,
                         children: [
-                          _buildColorLegendItem('Default/Unvisited', AppConstants.defaultNodeColor, theme),
-                          _buildColorLegendItem('Currently Processing', AppConstants.currentNodeColor, theme),
-                          _buildColorLegendItem('Found/Target', AppConstants.foundNodeColor, theme),
-                          _buildColorLegendItem('Checked/Visited', AppConstants.checkedNodeColor, theme),
-                          _buildColorLegendItem('Insertion Position', AppConstants.insertionNodeColor, theme),
+                          _buildColorLegendItem(
+                            'Default/Unvisited',
+                            AppConstants.defaultNodeColor,
+                            theme,
+                          ),
+                          _buildColorLegendItem(
+                            'Currently Processing',
+                            AppConstants.currentNodeColor,
+                            theme,
+                          ),
+                          _buildColorLegendItem(
+                            'Found/Target',
+                            AppConstants.foundNodeColor,
+                            theme,
+                          ),
+                          _buildColorLegendItem(
+                            'Checked/Visited',
+                            AppConstants.checkedNodeColor,
+                            theme,
+                          ),
+                          _buildColorLegendItem(
+                            'Insertion Position',
+                            AppConstants.insertionNodeColor,
+                            theme,
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Data structure info
                 Container(
                   width: double.infinity,
@@ -272,10 +302,7 @@ class LearningPanel extends StatelessWidget {
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(3),
-              border: Border.all(
-                color: Colors.grey[400]!,
-                width: 1,
-              ),
+              border: Border.all(color: Colors.grey[400]!, width: 1),
             ),
           ),
           const SizedBox(height: 4),
@@ -293,10 +320,11 @@ class LearningPanel extends StatelessWidget {
   String _getAlgorithmType() {
     final currentStep = dataStructure.currentStep;
     if (currentStep >= dataStructure.animationSteps.length) return 'Unknown';
-    
+
     final description = dataStructure.animationSteps[currentStep].description;
     if (description.contains('Linear Search')) return 'Linear Search';
-    if (description.contains('Sequential Traversal')) return 'Sequential Traversal';
+    if (description.contains('Sequential Traversal'))
+      return 'Sequential Traversal';
     if (description.contains('Binary Search')) return 'Binary Search';
     if (description.contains('Depth-First')) return 'DFS';
     if (description.contains('Breadth-First')) return 'BFS';
@@ -305,4 +333,4 @@ class LearningPanel extends StatelessWidget {
     if (description.contains('Merge Sort')) return 'Merge Sort';
     return 'Algorithm';
   }
-} 
+}

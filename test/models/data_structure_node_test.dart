@@ -61,10 +61,7 @@ void main() {
         label: 'Original',
       );
 
-      final updatedNode = originalNode.copyWith(
-        color: null,
-        label: null,
-      );
+      final updatedNode = originalNode.copyWith(color: null, label: null);
 
       expect(updatedNode.value, originalNode.value);
       expect(updatedNode.position, originalNode.position);
@@ -109,10 +106,15 @@ void main() {
     });
 
     test('equality with different properties', () {
-      final baseNode = DataStructureNode(value: 1, position: const Offset(0, 0));
+      final baseNode = DataStructureNode(
+        value: 1,
+        position: const Offset(0, 0),
+      );
 
       final differentValue = baseNode.copyWith(value: 2);
-      final differentPosition = baseNode.copyWith(position: const Offset(50, 50));
+      final differentPosition = baseNode.copyWith(
+        position: const Offset(50, 50),
+      );
       final differentColor = baseNode.copyWith(color: Colors.blue);
       final differentLabel = baseNode.copyWith(label: 'Different');
 
@@ -162,9 +164,18 @@ void main() {
     });
 
     test('constructor with all parameters', () {
-      final childNode = DataStructureNode(value: 2, position: const Offset(10, 10));
-      final nextNode = DataStructureNode(value: 3, position: const Offset(20, 20));
-      final prevNode = DataStructureNode(value: 0, position: const Offset(-10, -10));
+      final childNode = DataStructureNode(
+        value: 2,
+        position: const Offset(10, 10),
+      );
+      final nextNode = DataStructureNode(
+        value: 3,
+        position: const Offset(20, 20),
+      );
+      final prevNode = DataStructureNode(
+        value: 0,
+        position: const Offset(-10, -10),
+      );
 
       final node = DataStructureNode(
         value: 1,
@@ -197,4 +208,4 @@ void main() {
       expect(string, contains('DataStructureNode'));
     });
   });
-} 
+}

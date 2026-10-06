@@ -2,6 +2,8 @@ import '../models/base_data_structure.dart';
 import '../utils/logger.dart';
 import '../data_structures/stack_data_structure.dart';
 import '../data_structures/queue_data_structure.dart';
+import '../data_structures/heap_data_structure.dart';
+import '../data_structures/graph_data_structure.dart';
 
 /// Abstract base class for data structure operation strategies
 /// Implements the Strategy pattern to encapsulate different operation algorithms
@@ -81,7 +83,9 @@ class PopStrategy extends OperationStrategy {
     if (dataStructure is StackDataStructure) {
       dataStructure.pop();
     } else {
-      AppLogger.dataStructure('PopStrategy: Pop operation only supported for Stack');
+      AppLogger.dataStructure(
+        'PopStrategy: Pop operation only supported for Stack',
+      );
     }
   }
 }
@@ -93,7 +97,9 @@ class PeekStrategy extends OperationStrategy {
     if (dataStructure is StackDataStructure) {
       dataStructure.peek();
     } else {
-      AppLogger.dataStructure('PeekStrategy: Peek operation only supported for Stack');
+      AppLogger.dataStructure(
+        'PeekStrategy: Peek operation only supported for Stack',
+      );
     }
   }
 }
@@ -104,10 +110,56 @@ class IsEmptyStrategy extends OperationStrategy {
   void execute(BaseDataStructure dataStructure, {int? value}) {
     if (dataStructure is QueueDataStructure) {
       final isEmpty = dataStructure.isEmpty();
-      AppLogger.dataStructure('IsEmptyStrategy: Queue is ${isEmpty ? 'empty' : 'not empty'}');
+      AppLogger.dataStructure(
+        'IsEmptyStrategy: Queue is ${isEmpty ? 'empty' : 'not empty'}',
+      );
+    } else if (dataStructure is StackDataStructure) {
+      final isEmpty = dataStructure.isEmpty();
+      AppLogger.dataStructure(
+        'IsEmptyStrategy: Stack is ${isEmpty ? 'empty' : 'not empty'}',
+      );
     } else {
-      AppLogger.dataStructure('IsEmptyStrategy: IsEmpty operation only supported for Queue');
+      AppLogger.dataStructure(
+        'IsEmptyStrategy: IsEmpty operation only supported for Stack and Queue',
+      );
     }
+  }
+}
+
+class ExtractHeapStrategy extends OperationStrategy {
+  @override
+  void execute(BaseDataStructure dataStructure, {int? value}) {
+    if (dataStructure is HeapDataStructure) dataStructure.extractRoot();
+  }
+}
+
+class PeekHeapStrategy extends OperationStrategy {
+  @override
+  void execute(BaseDataStructure dataStructure, {int? value}) {
+    if (dataStructure is HeapDataStructure) dataStructure.peekRoot();
+  }
+}
+
+class HeapifyStrategy extends OperationStrategy {
+  @override
+  void execute(BaseDataStructure dataStructure, {int? value}) {
+    if (dataStructure is HeapDataStructure) dataStructure.heapify();
+  }
+}
+
+class BreadthFirstStrategy extends OperationStrategy {
+  @override
+  void execute(BaseDataStructure dataStructure, {int? value}) {
+    if (dataStructure is GraphDataStructure)
+      dataStructure.breadthFirstTraversal();
+  }
+}
+
+class DepthFirstStrategy extends OperationStrategy {
+  @override
+  void execute(BaseDataStructure dataStructure, {int? value}) {
+    if (dataStructure is GraphDataStructure)
+      dataStructure.depthFirstTraversal();
   }
 }
 
@@ -119,9 +171,11 @@ class OperationStrategyFactory {
       case 'add to end':
       case 'push':
       case 'enqueue':
+      case 'add vertex':
         return InsertStrategy();
       case 'delete':
       case 'dequeue':
+      case 'remove vertex':
         return DeleteStrategy();
       case 'pop':
         return PopStrategy();
@@ -134,6 +188,19 @@ class OperationStrategyFactory {
         return TraversalStrategy();
       case 'isempty':
         return IsEmptyStrategy();
+      case 'extract min':
+      case 'extract max':
+        return ExtractHeapStrategy();
+      case 'peek min':
+      case 'peek max':
+        return PeekHeapStrategy();
+      case 'heapify':
+      case 'build heap':
+        return HeapifyStrategy();
+      case 'bfs':
+        return BreadthFirstStrategy();
+      case 'dfs':
+        return DepthFirstStrategy();
       default:
         AppLogger.dataStructure('Unknown operation type: $operationType');
         return null;
@@ -154,6 +221,16 @@ class OperationStrategyFactory {
       'peek',
       'front',
       'isempty',
+      'add vertex',
+      'remove vertex',
+      'extract min',
+      'extract max',
+      'peek min',
+      'peek max',
+      'heapify',
+      'build heap',
+      'bfs',
+      'dfs',
     ];
   }
 }
@@ -171,8 +248,10 @@ class OperationContext {
       AppLogger.dataStructure('OperationContext: No strategy set');
       return;
     }
-    
-    AppLogger.dataStructure('OperationContext: Executing operation with strategy: ${_strategy.runtimeType}');
+
+    AppLogger.dataStructure(
+      'OperationContext: Executing operation with strategy: ${_strategy.runtimeType}',
+    );
     _strategy!.execute(dataStructure, value: value);
   }
 }
@@ -187,18 +266,24 @@ class OperationExecutor {
     required BaseDataStructure dataStructure,
     int? value,
   }) {
-    AppLogger.dataStructure('OperationExecutor: Executing $operationType with value: $value');
+    AppLogger.dataStructure(
+      'OperationExecutor: Executing $operationType with value: $value',
+    );
 
     // Validate operation type
     final strategy = OperationStrategyFactory.getStrategy(operationType);
     if (strategy == null) {
-      AppLogger.dataStructure('OperationExecutor: Invalid operation type: $operationType');
+      AppLogger.dataStructure(
+        'OperationExecutor: Invalid operation type: $operationType',
+      );
       return false;
     }
 
     // Validate value requirements
     if (_requiresValue(operationType) && value == null) {
-      AppLogger.dataStructure('OperationExecutor: Operation $operationType requires a value');
+      AppLogger.dataStructure(
+        'OperationExecutor: Operation $operationType requires a value',
+      );
       return false;
     }
 
@@ -206,10 +291,14 @@ class OperationExecutor {
     try {
       _context.setStrategy(strategy);
       _context.executeOperation(dataStructure, value: value);
-      AppLogger.dataStructure('OperationExecutor: Successfully executed $operationType');
+      AppLogger.dataStructure(
+        'OperationExecutor: Successfully executed $operationType',
+      );
       return true;
     } catch (e) {
-      AppLogger.dataStructure('OperationExecutor: Error executing $operationType: $e');
+      AppLogger.dataStructure(
+        'OperationExecutor: Error executing $operationType: $e',
+      );
       return false;
     }
   }
@@ -224,6 +313,8 @@ class OperationExecutor {
       'search',
       'push',
       'enqueue',
+      'add vertex',
+      'remove vertex',
     ];
     return valueRequiredOps.contains(operationType.toLowerCase());
   }
@@ -238,18 +329,13 @@ class OperationExecutor {
       'Search',
       'Push',
       'Enqueue',
+      'Add Vertex',
+      'Remove Vertex',
     ];
   }
 
   /// Gets list of operations that don't require values
   List<String> getValueOptionalOperations() {
-    return [
-      'Traverse',
-      'Pop',
-      'Dequeue',
-      'Peek',
-      'Front',
-      'IsEmpty',
-    ];
+    return ['Traverse', 'Pop', 'Dequeue', 'Peek', 'Front', 'IsEmpty'];
   }
 }

@@ -128,7 +128,7 @@ void main() {
         array.insert(1);
         array.insert(2);
         array.insert(3);
-        
+
         array.updateNodeValue(1, 99);
         expect(array.nodes[1].value, 99);
         expect(array.nodes[0].value, 1);
@@ -138,10 +138,10 @@ void main() {
       test('updateNodeValue with invalid index', () {
         array.insert(1);
         array.insert(2);
-        
+
         expect(() => array.updateNodeValue(-1, 99), returnsNormally);
         expect(() => array.updateNodeValue(5, 99), returnsNormally);
-        
+
         // Array should remain unchanged
         expect(array.nodes.length, 2);
         expect(array.nodes[0].value, 1);
@@ -208,11 +208,11 @@ void main() {
         array.insert(1);
         array.insert(2);
         array.insert(3);
-        
+
         expect(array.nodes[0].position.dx, 50.0);
         expect(array.nodes[1].position.dx, 50.0 + 80.0); // 50 + nodeBoxWidth
         expect(array.nodes[2].position.dx, 50.0 + 80.0 * 2);
-        
+
         // All nodes should have the same Y position
         expect(array.nodes[0].position.dy, array.nodes[1].position.dy);
         expect(array.nodes[1].position.dy, array.nodes[2].position.dy);
@@ -222,7 +222,7 @@ void main() {
         array.insert(1);
         array.insert(2);
         array.search(1);
-        
+
         // After search, nodes should have appropriate colors
         expect(array.animationSteps.length, greaterThan(0));
         final lastStep = array.animationSteps.last;
@@ -233,21 +233,22 @@ void main() {
         array.insert(1);
         array.insert(2);
         array.traverse();
-        
+
         expect(array.currentStep, 0);
       });
 
       test('animation steps are cleared between operations', () {
         array.insert(1);
-        final insertSteps = array.animationSteps.length;
-        
+        final insertSteps = List.of(array.animationSteps);
+
         array.delete(1);
-        final deleteSteps = array.animationSteps.length;
-        
-        expect(insertSteps, greaterThan(0));
-        expect(deleteSteps, greaterThan(0));
-        // Should have different step counts for different operations
-        expect(insertSteps, isNot(equals(deleteSteps)));
+        final deleteSteps = List.of(array.animationSteps);
+
+        expect(insertSteps, isNotEmpty);
+        expect(deleteSteps, isNotEmpty);
+        expect(insertSteps.first.description, contains('Insertion'));
+        expect(deleteSteps.first.description, contains('Deletion'));
+        expect(array.nodes, isEmpty);
       });
     });
 
@@ -256,7 +257,7 @@ void main() {
         array.insert(1);
         array.insert(2);
         array.insert(3);
-        
+
         // The private _data should match the public nodes
         expect(array.nodes.length, 3);
         expect(array.nodes.map((n) => n.value), [1, 2, 3]);
@@ -267,14 +268,14 @@ void main() {
         array.insert(2);
         array.insert(3);
         array.delete(2);
-        
+
         expect(array.nodes.length, 2);
         expect(array.nodes.map((n) => n.value), [1, 3]);
       });
 
       test('_data and nodes are synchronized after addNodesDirectly', () {
         array.addNodesDirectly([5, 10, 15]);
-        
+
         expect(array.nodes.length, 3);
         expect(array.nodes.map((n) => n.value), [5, 10, 15]);
       });
@@ -283,7 +284,7 @@ void main() {
         array.insert(1);
         array.insert(2);
         array.updateNodeValue(0, 99);
-        
+
         expect(array.nodes.length, 2);
         expect(array.nodes[0].value, 99);
         expect(array.nodes[1].value, 2);
@@ -299,7 +300,7 @@ void main() {
         array.search(1);
         array.updateNodeValue(0, 99);
         array.traverse();
-        
+
         // Final state should be consistent
         expect(array.nodes.length, 3);
         expect(array.nodes.map((n) => n.value), [99, 3, 4]);
@@ -311,7 +312,7 @@ void main() {
         for (int i = 0; i < 100; i++) {
           array.insert(i);
         }
-        
+
         expect(array.nodes.length, 100);
         expect(array.nodes.last.value, 99);
       });
@@ -321,12 +322,12 @@ void main() {
         for (int i = 0; i < 100; i++) {
           array.insert(i);
         }
-        
+
         // Delete all even numbers
         for (int i = 0; i < 100; i += 2) {
           array.delete(i);
         }
-        
+
         expect(array.nodes.length, 50);
         expect(array.nodes.every((n) => n.value % 2 == 1), true);
       });
@@ -339,10 +340,10 @@ void main() {
             array.delete(i);
           }
         }
-        
+
         array.search(25);
         array.traverse();
-        
+
         expect(array.nodes.length, 25);
         expect(array.nodes.every((n) => n.value % 2 == 1), true);
       });
@@ -365,7 +366,7 @@ void main() {
         for (int i = 0; i < 100; i++) {
           array.insert(i);
         }
-        
+
         expect(() => array.delete(999), returnsNormally);
         expect(array.nodes.length, 100);
       });
@@ -374,7 +375,7 @@ void main() {
         for (int i = 0; i < 100; i++) {
           array.insert(i);
         }
-        
+
         expect(() => array.search(50), returnsNormally);
         expect(array.nodes.length, 100);
       });
@@ -383,10 +384,10 @@ void main() {
         for (int i = 0; i < 100; i++) {
           array.insert(i);
         }
-        
+
         expect(() => array.traverse(), returnsNormally);
         expect(array.nodes.length, 100);
       });
     });
   });
-} 
+}

@@ -7,12 +7,18 @@ void main() {
     group('Node Dimensions', () {
       test('nodeBoxWidth is positive and reasonable', () {
         expect(AppConstants.nodeBoxWidth, greaterThan(0));
-        expect(AppConstants.nodeBoxWidth, lessThan(200)); // Reasonable max width
+        expect(
+          AppConstants.nodeBoxWidth,
+          lessThan(200),
+        ); // Reasonable max width
       });
 
       test('nodeBoxHeight is positive and reasonable', () {
         expect(AppConstants.nodeBoxHeight, greaterThan(0));
-        expect(AppConstants.nodeBoxHeight, lessThan(200)); // Reasonable max height
+        expect(
+          AppConstants.nodeBoxHeight,
+          lessThan(200),
+        ); // Reasonable max height
       });
 
       test('nodeSpacing is non-negative', () {
@@ -45,7 +51,10 @@ void main() {
       });
 
       test('stepDuration is reasonable', () {
-        expect(AppConstants.stepDuration.inMilliseconds, lessThan(10000)); // Max 10 seconds
+        expect(
+          AppConstants.stepDuration.inMilliseconds,
+          lessThan(10000),
+        ); // Max 10 seconds
       });
 
       test('scrollDuration is positive', () {
@@ -53,7 +62,10 @@ void main() {
       });
 
       test('scrollDuration is reasonable', () {
-        expect(AppConstants.scrollDuration.inMilliseconds, lessThan(5000)); // Max 5 seconds
+        expect(
+          AppConstants.scrollDuration.inMilliseconds,
+          lessThan(5000),
+        ); // Max 5 seconds
       });
 
       test('animationDuration is positive', () {
@@ -61,7 +73,10 @@ void main() {
       });
 
       test('animationDuration is reasonable', () {
-        expect(AppConstants.animationDuration.inMilliseconds, lessThan(5000)); // Max 5 seconds
+        expect(
+          AppConstants.animationDuration.inMilliseconds,
+          lessThan(5000),
+        ); // Max 5 seconds
       });
     });
 
@@ -162,27 +177,48 @@ void main() {
 
     group('Layout Constraints', () {
       test('node dimensions are proportional', () {
-        expect(AppConstants.nodeBoxWidth, greaterThan(AppConstants.nodeBoxHeight * 0.5));
-        expect(AppConstants.nodeBoxWidth, lessThan(AppConstants.nodeBoxHeight * 3));
+        expect(
+          AppConstants.nodeBoxWidth,
+          greaterThan(AppConstants.nodeBoxHeight * 0.5),
+        );
+        expect(
+          AppConstants.nodeBoxWidth,
+          lessThan(AppConstants.nodeBoxHeight * 3),
+        );
       });
 
       test('spacing is reasonable relative to node size', () {
-        expect(AppConstants.nodeSpacing, lessThan(AppConstants.nodeBoxWidth * 2));
-        expect(AppConstants.nodeSpacing, lessThan(AppConstants.nodeBoxHeight * 2));
+        expect(
+          AppConstants.nodeSpacing,
+          lessThan(AppConstants.nodeBoxWidth * 2),
+        );
+        expect(
+          AppConstants.nodeSpacing,
+          lessThan(AppConstants.nodeBoxHeight * 2),
+        );
       });
 
       test('canvas height is reasonable', () {
-        expect(AppConstants.minCanvasHeight, greaterThan(AppConstants.nodeBoxHeight * 2));
+        expect(
+          AppConstants.minCanvasHeight,
+          greaterThan(AppConstants.nodeBoxHeight * 2),
+        );
       });
     });
 
     group('Performance Constraints', () {
       test('animation duration is not too short', () {
-        expect(AppConstants.animationDuration.inMilliseconds, greaterThan(100)); // Min 100ms
+        expect(
+          AppConstants.animationDuration.inMilliseconds,
+          greaterThan(100),
+        ); // Min 100ms
       });
 
       test('animation duration is not too long', () {
-        expect(AppConstants.animationDuration.inMilliseconds, lessThan(5000)); // Max 5 seconds
+        expect(
+          AppConstants.animationDuration.inMilliseconds,
+          lessThan(5000),
+        ); // Max 5 seconds
       });
 
       test('scroll duration is reasonable', () {
@@ -261,4 +297,4 @@ void main() {
       expect(uniqueColors.length, colors.length);
     });
   });
-} 
+}

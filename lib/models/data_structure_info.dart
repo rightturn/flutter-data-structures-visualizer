@@ -28,4 +28,4 @@ class DataStructureInfo {
     required this.color,
     required this.operations,
   });
-} 
+}

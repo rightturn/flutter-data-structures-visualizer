@@ -50,18 +50,22 @@ void main() {
     group('Animation Control', () {
       test('startAnimation begins animation correctly', () {
         // Add animation steps to the data structure
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step 1',
-          code: 'test1',
-          nodes: [],
-          highlightedLine: 1,
-        ));
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step 2',
-          code: 'test2',
-          nodes: [],
-          highlightedLine: 2,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step 1',
+            code: 'test1',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step 2',
+            code: 'test2',
+            nodes: [],
+            highlightedLine: 2,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -74,12 +78,14 @@ void main() {
 
       test('pauseAnimation pauses animation correctly', () {
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -90,12 +96,14 @@ void main() {
 
       test('stopAnimation stops animation correctly', () {
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -118,18 +126,22 @@ void main() {
         );
 
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step 1',
-          code: 'test1',
-          nodes: [],
-          highlightedLine: 1,
-        ));
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step 2',
-          code: 'test2',
-          nodes: [],
-          highlightedLine: 2,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step 1',
+            code: 'test1',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step 2',
+            code: 'test2',
+            nodes: [],
+            highlightedLine: 2,
+          ),
+        );
 
         serviceWithCallbacks.startAnimation(mockDataStructure);
         expect(onAnimationStateChangedCalled, true);
@@ -138,7 +150,10 @@ void main() {
       });
 
       test('callbacks are optional', () {
-        expect(() => animationService.startAnimation(mockDataStructure), returnsNormally);
+        expect(
+          () => animationService.startAnimation(mockDataStructure),
+          returnsNormally,
+        );
         expect(() => animationService.pauseAnimation(), returnsNormally);
         expect(() => animationService.stopAnimation(), returnsNormally);
       });
@@ -148,12 +163,14 @@ void main() {
       test('animation timer advances steps correctly', () async {
         // Add multiple animation steps
         for (int i = 0; i < 3; i++) {
-          mockDataStructure.addAnimationStep(AnimationStep(
-            description: 'Step $i',
-            code: 'step$i',
-            nodes: [],
-            highlightedLine: i + 1,
-          ));
+          mockDataStructure.addAnimationStep(
+            AnimationStep(
+              description: 'Step $i',
+              code: 'step$i',
+              nodes: [],
+              highlightedLine: i + 1,
+            ),
+          );
         }
 
         animationService.startAnimation(mockDataStructure);
@@ -168,12 +185,14 @@ void main() {
 
       test('animation completes when reaching last step', () async {
         // Add only one step
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Single step',
-          code: 'single',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Single step',
+            code: 'single',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -199,12 +218,14 @@ void main() {
 
       test('multiple start calls', () {
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         animationService.startAnimation(mockDataStructure);
@@ -213,12 +234,14 @@ void main() {
 
       test('dispose cleans up resources', () {
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -231,12 +254,14 @@ void main() {
     group('State Transitions', () {
       test('start -> pause -> resume -> stop', () {
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -254,12 +279,14 @@ void main() {
 
       test('start -> stop directly', () {
         // Add animation steps
-        mockDataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        mockDataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         animationService.startAnimation(mockDataStructure);
         expect(animationService.isPlaying, true);
@@ -288,4 +315,4 @@ void main() {
       });
     });
   });
-} 
+}

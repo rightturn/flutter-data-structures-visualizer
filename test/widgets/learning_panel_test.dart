@@ -91,14 +91,8 @@ void main() {
       );
 
       testNodes = [
-        DataStructureNode(
-          value: 1,
-          position: const Offset(100, 50),
-        ),
-        DataStructureNode(
-          value: 2,
-          position: const Offset(100, 100),
-        ),
+        DataStructureNode(value: 1, position: const Offset(100, 50)),
+        DataStructureNode(value: 2, position: const Offset(100, 100)),
       ];
 
       testSteps = [
@@ -133,7 +127,8 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: LearningPanel(
-            dataStructure: dataStructure ?? MockDataStructure(testNodes, testSteps),
+            dataStructure:
+                dataStructure ?? MockDataStructure(testNodes, testSteps),
             dataStructureInfo: info ?? dataStructureInfo,
           ),
         ),
@@ -172,7 +167,10 @@ void main() {
 
         // Should show current step section
         expect(find.text('Current Step'), findsOneWidget);
-        expect(find.text('Linear Search: Check element at index 0'), findsOneWidget);
+        expect(
+          find.text('Linear Search: Check element at index 0'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('renders insights when available', (tester) async {
@@ -180,7 +178,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should show insights
-        expect(find.text('This is the first step of linear search algorithm.'), findsOneWidget);
+        expect(
+          find.text('This is the first step of linear search algorithm.'),
+          findsOneWidget,
+        );
         expect(find.byIcon(Icons.lightbulb_outline), findsOneWidget);
       });
 
@@ -217,9 +218,11 @@ void main() {
     });
 
     group('Step Navigation', () {
-      testWidgets('updates step counter when current step changes', (tester) async {
+      testWidgets('updates step counter when current step changes', (
+        tester,
+      ) async {
         final dataStructure = MockDataStructure(testNodes, testSteps);
-        
+
         await tester.pumpWidget(createTestWidget(dataStructure: dataStructure));
         await tester.pumpAndSettle();
 
@@ -235,14 +238,19 @@ void main() {
         expect(find.text('Step 2 of 3'), findsOneWidget);
       });
 
-      testWidgets('updates step description when current step changes', (tester) async {
+      testWidgets('updates step description when current step changes', (
+        tester,
+      ) async {
         final dataStructure = MockDataStructure(testNodes, testSteps);
-        
+
         await tester.pumpWidget(createTestWidget(dataStructure: dataStructure));
         await tester.pumpAndSettle();
 
         // Initial step description
-        expect(find.text('Linear Search: Check element at index 0'), findsOneWidget);
+        expect(
+          find.text('Linear Search: Check element at index 0'),
+          findsOneWidget,
+        );
 
         // Change to step 2 and rebuild widget
         dataStructure.setCurrentStep(1);
@@ -250,12 +258,17 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should update step description
-        expect(find.text('Linear Search: Check element at index 1'), findsOneWidget);
+        expect(
+          find.text('Linear Search: Check element at index 1'),
+          findsOneWidget,
+        );
       });
 
-      testWidgets('updates code snippet when current step changes', (tester) async {
+      testWidgets('updates code snippet when current step changes', (
+        tester,
+      ) async {
         final dataStructure = MockDataStructure(testNodes, testSteps);
-        
+
         await tester.pumpWidget(createTestWidget(dataStructure: dataStructure));
         await tester.pumpAndSettle();
 
@@ -273,12 +286,15 @@ void main() {
 
       testWidgets('updates insights when current step changes', (tester) async {
         final dataStructure = MockDataStructure(testNodes, testSteps);
-        
+
         await tester.pumpWidget(createTestWidget(dataStructure: dataStructure));
         await tester.pumpAndSettle();
 
         // Initial insights
-        expect(find.text('This is the first step of linear search algorithm.'), findsOneWidget);
+        expect(
+          find.text('This is the first step of linear search algorithm.'),
+          findsOneWidget,
+        );
 
         // Change to step 2 and rebuild widget
         dataStructure.setCurrentStep(1);
@@ -286,7 +302,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should update insights
-        expect(find.text('Continue searching through the array.'), findsOneWidget);
+        expect(
+          find.text('Continue searching through the array.'),
+          findsOneWidget,
+        );
       });
     });
 
@@ -404,7 +423,9 @@ void main() {
       testWidgets('handles empty animation steps', (tester) async {
         final emptyDataStructure = MockDataStructure(testNodes, []);
 
-        await tester.pumpWidget(createTestWidget(dataStructure: emptyDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: emptyDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Should still show header and data structure info
@@ -438,7 +459,10 @@ void main() {
             insights: '', // Empty insights
           ),
         ];
-        final dataStructure = MockDataStructure(testNodes, stepsWithoutInsights);
+        final dataStructure = MockDataStructure(
+          testNodes,
+          stepsWithoutInsights,
+        );
 
         await tester.pumpWidget(createTestWidget(dataStructure: dataStructure));
         await tester.pumpAndSettle();
@@ -472,7 +496,9 @@ void main() {
     });
 
     group('Data Structure Info', () {
-      testWidgets('renders data structure name and description', (tester) async {
+      testWidgets('renders data structure name and description', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
@@ -510,7 +536,9 @@ void main() {
         expect(find.text('Color Legend'), findsOneWidget);
       });
 
-      testWidgets('uses data structure color for accent elements', (tester) async {
+      testWidgets('uses data structure color for accent elements', (
+        tester,
+      ) async {
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
 
@@ -520,4 +548,4 @@ void main() {
       });
     });
   });
-} 
+}

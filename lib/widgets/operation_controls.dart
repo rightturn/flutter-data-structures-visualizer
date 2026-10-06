@@ -9,6 +9,7 @@ import '../data_structures/linked_list_data_structure.dart';
 import '../utils/constants.dart';
 import '../utils/logger.dart';
 import '../services/operation_controller.dart';
+import '../data_structures/graph_data_structure.dart';
 
 /// Widget for displaying and handling operations for a data structure (array, stack, linked list)
 /// Shows operation chips, dialogs for value input, and handles random data generation
@@ -18,8 +19,10 @@ class OperationControls extends StatefulWidget {
   final VoidCallback onOperationPerformed;
   final Function(int)? onNodeHighlighted;
   final Function(bool)? onAnimationStateChanged;
-  final VoidCallback? onShowProgress; // Callback to show progress bar/hide operations
-  final VoidCallback? onHideProgress; // Callback to hide progress bar/show operations
+  final VoidCallback?
+  onShowProgress; // Callback to show progress bar/hide operations
+  final VoidCallback?
+  onHideProgress; // Callback to hide progress bar/show operations
 
   const OperationControls({
     super.key,
@@ -38,9 +41,11 @@ class OperationControls extends StatefulWidget {
 
 // ================== STATE ==================
 class _OperationControlsState extends State<OperationControls> {
-  final TextEditingController _valueController = TextEditingController(); // For value input dialogs
+  final TextEditingController _valueController =
+      TextEditingController(); // For value input dialogs
   String? _selectedOperation; // Currently selected operation (for dialogs)
-  final OperationController _operationController = OperationController(); // Business logic controller
+  final OperationController _operationController =
+      OperationController(); // Business logic controller
 
   @override
   void dispose() {
@@ -50,7 +55,11 @@ class _OperationControlsState extends State<OperationControls> {
 
   // ================== UI BUILDERS ==================
   /// Build controls for linked list operations (quick chips, add to start/end, random data)
-  Widget _buildLinkedListControls(BuildContext context, ThemeData theme, List<String> operations) {
+  Widget _buildLinkedListControls(
+    BuildContext context,
+    ThemeData theme,
+    List<String> operations,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Card(
@@ -97,7 +106,9 @@ class _OperationControlsState extends State<OperationControls> {
                       },
                     ),
                     // Other operations as chips
-                    ...operations.where((op) => op != 'Insert').map((operation) {
+                    ...operations.where((op) => op != 'Insert').map((
+                      operation,
+                    ) {
                       return ActionChip(
                         label: Text(operation),
                         avatar: Icon(
@@ -106,12 +117,19 @@ class _OperationControlsState extends State<OperationControls> {
                           color: widget.dataStructureInfo.color,
                         ),
                         onPressed: () async {
+                          if (operation == 'Add Edge' &&
+                              widget.dataStructure is GraphDataStructure) {
+                            _showEdgeDialog();
+                            return;
+                          }
                           // Handle quick operations and dialogs
                           if (!_needsValue(operation)) {
                             if (operation == 'Traverse') {
                               // Show progress bar, start traverse
                               if (widget.onShowProgress != null) {
-                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                AppLogger.ui(
+                                  'Calling onShowProgress from ActionChip (Traverse)',
+                                );
                                 widget.onShowProgress!();
                               }
                               widget.dataStructure.traverse();
@@ -171,7 +189,11 @@ class _OperationControlsState extends State<OperationControls> {
   }
 
   /// Build controls for queue operations (quick chips, random data)
-  Widget _buildQueueControls(BuildContext context, ThemeData theme, List<String> operations) {
+  Widget _buildQueueControls(
+    BuildContext context,
+    ThemeData theme,
+    List<String> operations,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Card(
@@ -203,12 +225,19 @@ class _OperationControlsState extends State<OperationControls> {
                           color: widget.dataStructureInfo.color,
                         ),
                         onPressed: () async {
+                          if (operation == 'Add Edge' &&
+                              widget.dataStructure is GraphDataStructure) {
+                            _showEdgeDialog();
+                            return;
+                          }
                           // Handle quick operations and dialogs
                           if (!_needsValue(operation)) {
                             if (operation == 'Traverse') {
                               // Show progress bar, start traverse
                               if (widget.onShowProgress != null) {
-                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                AppLogger.ui(
+                                  'Calling onShowProgress from ActionChip (Traverse)',
+                                );
                                 widget.onShowProgress!();
                               }
                               widget.dataStructure.traverse();
@@ -222,7 +251,9 @@ class _OperationControlsState extends State<OperationControls> {
                             } else if (operation == 'Front') {
                               // Show progress bar, perform front
                               if (widget.onShowProgress != null) {
-                                AppLogger.ui('Calling onShowProgress from ActionChip (Front)');
+                                AppLogger.ui(
+                                  'Calling onShowProgress from ActionChip (Front)',
+                                );
                                 widget.onShowProgress!();
                               }
                               setState(() {
@@ -278,7 +309,11 @@ class _OperationControlsState extends State<OperationControls> {
   }
 
   /// Build controls for stack operations (quick chips, random data)
-  Widget _buildStackControls(BuildContext context, ThemeData theme, List<String> operations) {
+  Widget _buildStackControls(
+    BuildContext context,
+    ThemeData theme,
+    List<String> operations,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Card(
@@ -315,7 +350,9 @@ class _OperationControlsState extends State<OperationControls> {
                             if (operation == 'Traverse') {
                               // Show progress bar, start traverse
                               if (widget.onShowProgress != null) {
-                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                AppLogger.ui(
+                                  'Calling onShowProgress from ActionChip (Traverse)',
+                                );
                                 widget.onShowProgress!();
                               }
                               widget.dataStructure.traverse();
@@ -329,7 +366,9 @@ class _OperationControlsState extends State<OperationControls> {
                             } else if (operation == 'Peek') {
                               // Show progress bar, perform peek
                               if (widget.onShowProgress != null) {
-                                AppLogger.ui('Calling onShowProgress from ActionChip (Peek)');
+                                AppLogger.ui(
+                                  'Calling onShowProgress from ActionChip (Peek)',
+                                );
                                 widget.onShowProgress!();
                               }
                               setState(() {
@@ -385,7 +424,11 @@ class _OperationControlsState extends State<OperationControls> {
   }
 
   /// Build controls for array operations (dropdown, value input, quick chips, random data)
-  Widget _buildArrayControls(BuildContext context, ThemeData theme, List<String> operations) {
+  Widget _buildArrayControls(
+    BuildContext context,
+    ThemeData theme,
+    List<String> operations,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Card(
@@ -403,59 +446,8 @@ class _OperationControlsState extends State<OperationControls> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Dropdown for selecting operation
-                SizedBox(
-                  width: double.infinity,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedOperation,
-                    decoration: InputDecoration(
-                      labelText: 'Select Operation',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.settings,
-                        color: widget.dataStructureInfo.color,
-                      ),
-                    ),
-                    items: operations.map((operation) {
-                      return DropdownMenuItem(
-                        value: operation,
-                        child: Text(
-                          operation,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedOperation = value;
-                      });
-                    },
-                  ),
-                ),
                 const SizedBox(height: 12),
-                // Value input for operations that require a value
-                if (_selectedOperation != null && _needsValue(_selectedOperation!))
-                  TextFormField(
-                    controller: _valueController,
-                    decoration: InputDecoration(
-                      labelText: 'Value',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.input,
-                        color: widget.dataStructureInfo.color,
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                  ),
-                const SizedBox(height: 12),
-                // Quick operation chips for array
+                // Quick operation chips
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -469,17 +461,27 @@ class _OperationControlsState extends State<OperationControls> {
                           color: widget.dataStructureInfo.color,
                         ),
                         onPressed: () async {
+                          if (operation == 'Add Edge' &&
+                              widget.dataStructure is GraphDataStructure) {
+                            _showEdgeDialog();
+                            return;
+                          }
                           // Handle quick operations and dialogs
                           if (!_needsValue(operation)) {
                             if (operation == 'Traverse') {
                               // Show progress bar, start traverse
                               if (widget.onShowProgress != null) {
-                                AppLogger.ui('Calling onShowProgress from ActionChip (Traverse)');
+                                AppLogger.ui(
+                                  'Calling onShowProgress from ActionChip (Traverse)',
+                                );
                                 widget.onShowProgress!();
                               }
                               widget.dataStructure.traverse();
-                              final steps = widget.dataStructure.animationSteps.length;
-                              AppLogger.operation('Traverse: nodes=${widget.dataStructure.nodes.map((n) => n.value).toList()}');
+                              final steps =
+                                  widget.dataStructure.animationSteps.length;
+                              AppLogger.operation(
+                                'Traverse: nodes=${widget.dataStructure.nodes.map((n) => n.value).toList()}',
+                              );
                               AppLogger.operation('Traverse: steps=$steps');
                               setState(() {
                                 widget.dataStructure.goToStep(0);
@@ -489,25 +491,37 @@ class _OperationControlsState extends State<OperationControls> {
                                 widget.onAnimationStateChanged!(true);
                               }
                             } else if (operation == 'Search') {
-                              AppLogger.operation('Search operation selected, showing dialog');
+                              AppLogger.operation(
+                                'Search operation selected, showing dialog',
+                              );
                               setState(() {
                                 _selectedOperation = operation;
                               });
-                              AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                              AppLogger.operation(
+                                '_selectedOperation set to: $_selectedOperation',
+                              );
                               _showValueDialog(operation);
                             } else if (operation == 'Insert') {
-                              AppLogger.operation('Insert operation selected, showing dialog');
+                              AppLogger.operation(
+                                'Insert operation selected, showing dialog',
+                              );
                               setState(() {
                                 _selectedOperation = operation;
                               });
-                              AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                              AppLogger.operation(
+                                '_selectedOperation set to: $_selectedOperation',
+                              );
                               _showValueDialog(operation);
                             } else if (operation == 'Delete') {
-                              AppLogger.operation('Delete operation selected, showing dialog');
+                              AppLogger.operation(
+                                'Delete operation selected, showing dialog',
+                              );
                               setState(() {
                                 _selectedOperation = operation;
                               });
-                              AppLogger.operation('_selectedOperation set to: $_selectedOperation');
+                              AppLogger.operation(
+                                '_selectedOperation set to: $_selectedOperation',
+                              );
                               _showValueDialog(operation);
                             } else {
                               setState(() {
@@ -554,7 +568,8 @@ class _OperationControlsState extends State<OperationControls> {
     final theme = Theme.of(context);
     final operations = widget.dataStructureInfo.operations;
     final isArray = widget.dataStructureInfo.type == DataStructureType.array;
-    final isLinkedList = widget.dataStructureInfo.type == DataStructureType.linkedList;
+    final isLinkedList =
+        widget.dataStructureInfo.type == DataStructureType.linkedList;
     final isStack = widget.dataStructureInfo.type == DataStructureType.stack;
     final isQueue = widget.dataStructureInfo.type == DataStructureType.queue;
 
@@ -570,14 +585,23 @@ class _OperationControlsState extends State<OperationControls> {
     if (isArray) {
       return _buildArrayControls(context, theme, operations);
     }
-    // Default fallback (should not occur)
-    return const SizedBox.shrink();
+    return _buildArrayControls(context, theme, operations);
   }
 
   // ================== LOGIC HELPERS ==================
   /// Returns true if the operation requires a value input
   bool _needsValue(String operation) {
-    return ['Insert', 'Add to Start', 'Add to End', 'Delete', 'Search', 'Push', 'Enqueue'].contains(operation);
+    return [
+      'Insert',
+      'Add to Start',
+      'Add to End',
+      'Delete',
+      'Search',
+      'Push',
+      'Enqueue',
+      'Add Vertex',
+      'Remove Vertex',
+    ].contains(operation);
   }
 
   /// Returns the icon for a given operation name
@@ -616,8 +640,10 @@ class _OperationControlsState extends State<OperationControls> {
         _showErrorMessage('Please enter a valid number');
         return;
       }
-      
-      final validation = _operationController.validateInput(_valueController.text);
+
+      final validation = _operationController.validateInput(
+        _valueController.text,
+      );
       if (!validation.isValid) {
         _showErrorMessage(validation.errorMessage!);
         return;
@@ -628,16 +654,40 @@ class _OperationControlsState extends State<OperationControls> {
     AppLogger.operation('Executing $_selectedOperation with value: $value');
 
     // Show progress bar for operations that need it
-    final progressOperations = ['Add to Start', 'Add to End', 'Delete', 'Search', 'Traverse', 'Push', 'Pop', 'Insert', 'Enqueue', 'Dequeue', 'Front'];
+    final progressOperations = [
+      'Add to Start',
+      'Add to End',
+      'Delete',
+      'Search',
+      'Traverse',
+      'Push',
+      'Pop',
+      'Insert',
+      'Enqueue',
+      'Dequeue',
+      'Front',
+      'Add Vertex',
+      'Remove Vertex',
+      'Extract Min',
+      'Extract Max',
+      'Peek Min',
+      'Peek Max',
+      'Heapify',
+      'DFS',
+      'BFS',
+    ];
     if (progressOperations.contains(_selectedOperation)) {
-      AppLogger.ui('Calling onShowProgress from _executeOperation ($_selectedOperation)');
+      AppLogger.ui(
+        'Calling onShowProgress from _executeOperation ($_selectedOperation)',
+      );
       widget.onShowProgress?.call();
     }
 
     // Execute operation using controller
     late OperationResult result;
-    if (widget.dataStructure is LinkedListDataStructure && 
-        (_selectedOperation == 'Add to Start' || _selectedOperation == 'Add to End')) {
+    if (widget.dataStructure is LinkedListDataStructure &&
+        (_selectedOperation == 'Add to Start' ||
+            _selectedOperation == 'Add to End')) {
       result = await _operationController.executeLinkedListOperation(
         operationType: _selectedOperation!,
         linkedList: widget.dataStructure as LinkedListDataStructure,
@@ -668,10 +718,11 @@ class _OperationControlsState extends State<OperationControls> {
     final completedOperation = _selectedOperation;
     _selectedOperation = null;
     widget.onOperationPerformed();
-    
+
     // Auto-start animation for operations that have animation steps
-    if (completedOperation != null && 
-        ['Push', 'Pop', 'Insert', 'Delete', 'Search', 'Add to Start', 'Add to End', 'Enqueue', 'Dequeue', 'Front'].contains(completedOperation)) {
+    if (completedOperation != null &&
+        completedOperation != 'IsEmpty' &&
+        widget.dataStructure.animationSteps.isNotEmpty) {
       if (widget.onAnimationStateChanged != null) {
         widget.onAnimationStateChanged!(true);
       }
@@ -699,9 +750,7 @@ class _OperationControlsState extends State<OperationControls> {
                   labelText: 'Value',
                   hintText: 'Enter a number',
                 ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 autofocus: true,
               ),
             ],
@@ -733,14 +782,84 @@ class _OperationControlsState extends State<OperationControls> {
     );
   }
 
+  void _showEdgeDialog() {
+    final fromController = TextEditingController();
+    final toController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Edge'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: fromController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'From vertex'),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            ),
+            TextField(
+              controller: toController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'To vertex'),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final from = int.tryParse(fromController.text);
+              final to = int.tryParse(toController.text);
+              if (from == null || to == null) return;
+              final result = await _operationController.addGraphEdge(
+                graph: widget.dataStructure as GraphDataStructure,
+                from: from,
+                to: to,
+              );
+              if (!mounted) return;
+              Navigator.of(context).pop();
+              if (!result.isSuccess) {
+                _showErrorMessage(result.message);
+                return;
+              }
+              widget.onOperationPerformed();
+              widget.onAnimationStateChanged?.call(true);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Shows a dialog to confirm random data generation
   void _showGenerateRandomDialog() {
+    final countController = TextEditingController(
+      text: AppConstants.defaultNodeCount.toString(),
+    );
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Generate Random Data'),
-          content: const Text('This will replace the current data with random values.'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Enter the number of items to generate:'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: countController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Number of items'),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -748,7 +867,9 @@ class _OperationControlsState extends State<OperationControls> {
             ),
             ElevatedButton(
               onPressed: () {
-                _generateRandomData();
+                final count = int.tryParse(countController.text);
+                if (count == null) return;
+                _generateRandomData(count);
                 Navigator.of(context).pop();
               },
               child: const Text('Generate'),
@@ -760,11 +881,11 @@ class _OperationControlsState extends State<OperationControls> {
   }
 
   /// Generates random data using the operation controller
-  void _generateRandomData() async {
+  void _generateRandomData(int count) async {
     final result = await _operationController.generateRandomData(
       dataStructure: widget.dataStructure,
       dataStructureInfo: widget.dataStructureInfo,
-      count: AppConstants.defaultNodeCount,
+      count: count,
       minValue: AppConstants.minNodeValue,
       maxValue: AppConstants.maxNodeValue,
     );
@@ -788,4 +909,4 @@ class _OperationControlsState extends State<OperationControls> {
       ),
     );
   }
-} 
+}

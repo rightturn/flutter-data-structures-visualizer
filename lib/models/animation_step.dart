@@ -16,4 +16,4 @@ class AnimationStep {
     this.duration = const Duration(milliseconds: 1000),
     this.insights = '',
   });
-} 
+}

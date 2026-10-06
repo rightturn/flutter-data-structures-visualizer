@@ -166,14 +166,8 @@ void main() {
 
     setUp(() {
       testNodes = [
-        DataStructureNode(
-          value: 1,
-          position: const Offset(100, 50),
-        ),
-        DataStructureNode(
-          value: 2,
-          position: const Offset(100, 100),
-        ),
+        DataStructureNode(value: 1, position: const Offset(100, 50)),
+        DataStructureNode(value: 2, position: const Offset(100, 100)),
       ];
 
       mockDataStructure = MockDataStructure(testNodes);
@@ -220,7 +214,9 @@ void main() {
 
     group('Rendering', () {
       testWidgets('renders operation controls for array', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Should show operations title
@@ -244,19 +240,21 @@ void main() {
         expect(find.text('Operations'), findsOneWidget);
 
         // Should show operation chips
-        expect(find.text('Insert'), findsOneWidget);
+        expect(find.text('Add to Start'), findsOneWidget);
+        expect(find.text('Add to End'), findsOneWidget);
         expect(find.text('Delete'), findsOneWidget);
         expect(find.text('Search'), findsOneWidget);
         expect(find.text('Traverse'), findsOneWidget);
 
-        // Should not show generate random data button for non-arrays
-        expect(find.text('Generate Random Data'), findsNothing);
+        expect(find.text('Generate Random Data'), findsOneWidget);
       });
     });
 
     group('Array Operations', () {
       testWidgets('shows value dialog for insert operation', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap insert operation
@@ -270,7 +268,9 @@ void main() {
       });
 
       testWidgets('shows value dialog for delete operation', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap delete operation
@@ -283,7 +283,9 @@ void main() {
       });
 
       testWidgets('shows value dialog for search operation', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap search operation
@@ -299,11 +301,13 @@ void main() {
         bool operationPerformed = false;
         bool animationStarted = false;
 
-        await tester.pumpWidget(createTestWidget(
-          dataStructure: mockArrayDataStructure,
-          onOperationPerformed: () => operationPerformed = true,
-          onAnimationStateChanged: (state) => animationStarted = state,
-        ));
+        await tester.pumpWidget(
+          createTestWidget(
+            dataStructure: mockArrayDataStructure,
+            onOperationPerformed: () => operationPerformed = true,
+            onAnimationStateChanged: (state) => animationStarted = state,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Tap traverse operation
@@ -316,7 +320,9 @@ void main() {
       });
 
       testWidgets('shows generate random data dialog', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap generate random data button
@@ -324,15 +330,23 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should show dialog
-        expect(find.text('Generate Random Data'), findsNWidgets(2)); // One in button, one in dialog
-        expect(find.text('Enter the number of items to generate:'), findsOneWidget);
+        expect(
+          find.text('Generate Random Data'),
+          findsNWidgets(2),
+        ); // One in button, one in dialog
+        expect(
+          find.text('Enter the number of items to generate:'),
+          findsOneWidget,
+        );
         expect(find.text('Number of items'), findsOneWidget);
       });
     });
 
     group('Dialog Interactions', () {
       testWidgets('can cancel value dialog', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap insert operation
@@ -351,11 +365,13 @@ void main() {
         bool operationPerformed = false;
         bool animationStarted = false;
 
-        await tester.pumpWidget(createTestWidget(
-          dataStructure: mockArrayDataStructure,
-          onOperationPerformed: () => operationPerformed = true,
-          onAnimationStateChanged: (state) => animationStarted = state,
-        ));
+        await tester.pumpWidget(
+          createTestWidget(
+            dataStructure: mockArrayDataStructure,
+            onOperationPerformed: () => operationPerformed = true,
+            onAnimationStateChanged: (state) => animationStarted = state,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Tap insert operation
@@ -366,17 +382,18 @@ void main() {
         await tester.enterText(find.byType(TextField), '42');
         await tester.pumpAndSettle();
 
-        // Tap execute button
-        await tester.tap(find.text('Execute'));
+        await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
 
         // Should call callbacks
         expect(operationPerformed, true);
-        expect(animationStarted, true);
+        expect(animationStarted, false);
       });
 
       testWidgets('can cancel generate random data dialog', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap generate random data button
@@ -388,16 +405,21 @@ void main() {
         await tester.pumpAndSettle();
 
         // Dialog should be dismissed
-        expect(find.text('Generate Random Data'), findsOneWidget); // Only the button
+        expect(
+          find.text('Generate Random Data'),
+          findsOneWidget,
+        ); // Only the button
       });
 
       testWidgets('can generate random data', (tester) async {
         bool operationPerformed = false;
 
-        await tester.pumpWidget(createTestWidget(
-          dataStructure: mockArrayDataStructure,
-          onOperationPerformed: () => operationPerformed = true,
-        ));
+        await tester.pumpWidget(
+          createTestWidget(
+            dataStructure: mockArrayDataStructure,
+            onOperationPerformed: () => operationPerformed = true,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Tap generate random data button
@@ -419,7 +441,9 @@ void main() {
 
     group('Input Validation', () {
       testWidgets('validates numeric input in dialogs', (tester) async {
-        await tester.pumpWidget(createTestWidget(dataStructure: mockArrayDataStructure));
+        await tester.pumpWidget(
+          createTestWidget(dataStructure: mockArrayDataStructure),
+        );
         await tester.pumpAndSettle();
 
         // Tap insert operation
@@ -437,11 +461,13 @@ void main() {
 
     group('Error Handling', () {
       testWidgets('handles null callbacks gracefully', (tester) async {
-        await tester.pumpWidget(createTestWidget(
-          onOperationPerformed: null,
-          onNodeHighlighted: null,
-          onAnimationStateChanged: null,
-        ));
+        await tester.pumpWidget(
+          createTestWidget(
+            onOperationPerformed: null,
+            onNodeHighlighted: null,
+            onAnimationStateChanged: null,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Should render without errors
@@ -466,4 +492,4 @@ void main() {
       });
     });
   });
-} 
+}

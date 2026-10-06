@@ -38,18 +38,22 @@ void main() {
     group('Animation Steps Management', () {
       test('clearAnimationSteps removes all animation steps', () {
         // Add some animation steps
-        dataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step 1',
-          code: 'test1',
-          nodes: [],
-          highlightedLine: 1,
-        ));
-        dataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step 2',
-          code: 'test2',
-          nodes: [],
-          highlightedLine: 2,
-        ));
+        dataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step 1',
+            code: 'test1',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
+        dataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step 2',
+            code: 'test2',
+            nodes: [],
+            highlightedLine: 2,
+          ),
+        );
 
         expect(dataStructure.animationSteps.length, 2);
 
@@ -97,12 +101,14 @@ void main() {
       test('goToStep updates current step correctly', () {
         // Add animation steps
         for (int i = 0; i < 3; i++) {
-          dataStructure.addAnimationStep(AnimationStep(
-            description: 'Step $i',
-            code: 'step$i',
-            nodes: [],
-            highlightedLine: i + 1,
-          ));
+          dataStructure.addAnimationStep(
+            AnimationStep(
+              description: 'Step $i',
+              code: 'step$i',
+              nodes: [],
+              highlightedLine: i + 1,
+            ),
+          );
         }
 
         dataStructure.goToStep(1);
@@ -111,12 +117,14 @@ void main() {
 
       test('goToStep with invalid step handles gracefully', () {
         // Add one animation step
-        dataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        dataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
 
         // Try to go to invalid steps
         expect(() => dataStructure.goToStep(-1), returnsNormally);
@@ -158,12 +166,14 @@ void main() {
         final testNodes = [
           DataStructureNode(value: 1, position: const Offset(0, 0)),
         ];
-        dataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: testNodes,
-          highlightedLine: 1,
-        ));
+        dataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: testNodes,
+            highlightedLine: 1,
+          ),
+        );
 
         dataStructure.updateNodes();
         expect(dataStructure.nodes.length, 1);
@@ -174,12 +184,14 @@ void main() {
     group('Reset Functionality', () {
       test('resetToDefault clears animation and resets step', () {
         // Add animation steps and change current step
-        dataStructure.addAnimationStep(AnimationStep(
-          description: 'Test step',
-          code: 'test',
-          nodes: [],
-          highlightedLine: 1,
-        ));
+        dataStructure.addAnimationStep(
+          AnimationStep(
+            description: 'Test step',
+            code: 'test',
+            nodes: [],
+            highlightedLine: 1,
+          ),
+        );
         dataStructure.goToStep(0);
 
         dataStructure.resetToDefault();
@@ -207,4 +219,4 @@ void main() {
       });
     });
   });
-} 
+}
