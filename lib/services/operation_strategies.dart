@@ -150,16 +150,18 @@ class HeapifyStrategy extends OperationStrategy {
 class BreadthFirstStrategy extends OperationStrategy {
   @override
   void execute(BaseDataStructure dataStructure, {int? value}) {
-    if (dataStructure is GraphDataStructure)
+    if (dataStructure is GraphDataStructure) {
       dataStructure.breadthFirstTraversal();
+    }
   }
 }
 
 class DepthFirstStrategy extends OperationStrategy {
   @override
   void execute(BaseDataStructure dataStructure, {int? value}) {
-    if (dataStructure is GraphDataStructure)
+    if (dataStructure is GraphDataStructure) {
       dataStructure.depthFirstTraversal();
+    }
   }
 }
 

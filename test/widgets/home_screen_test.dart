@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:data_structures/screens/home_screen.dart';
 import 'package:data_structures/utils/data_structure_factory.dart';
 
@@ -64,8 +63,8 @@ void main() {
       WidgetTester tester,
     ) async {
       // Test with small screen
-      tester.binding.window.physicalSizeTestValue = const Size(400, 800);
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
 
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
       await tester.pumpAndSettle();
@@ -75,8 +74,8 @@ void main() {
       expect(find.text('Linked Lists'), findsOneWidget);
 
       // Reset screen size
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     testWidgets('data structure cards have correct styling', (
@@ -254,7 +253,7 @@ void main() {
           home: const HomeScreen(),
           builder: (context, child) {
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.5),
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.5)),
               child: child!,
             );
           },
@@ -291,17 +290,17 @@ void main() {
       WidgetTester tester,
     ) async {
       // Test in portrait mode
-      tester.binding.window.physicalSizeTestValue = const Size(400, 800);
+      tester.view.physicalSize = const Size(400, 800);
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
       expect(find.byType(HomeScreen), findsOneWidget);
 
       // Test in landscape mode
-      tester.binding.window.physicalSizeTestValue = const Size(800, 400);
+      tester.view.physicalSize = const Size(800, 400);
       await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
       expect(find.byType(HomeScreen), findsOneWidget);
 
       // Reset
-      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.view.resetPhysicalSize();
     });
 
     testWidgets('cards have proper elevation and shape', (

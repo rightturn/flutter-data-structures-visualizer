@@ -235,14 +235,17 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
     if (lower.contains('search')) return Icons.search;
     if (lower.contains('insert') ||
         lower.contains('push') ||
-        lower.contains('enqueue'))
+        lower.contains('enqueue')) {
       return Icons.add_circle_outline;
+    }
     if (lower.contains('delete') ||
         lower.contains('pop') ||
-        lower.contains('dequeue'))
+        lower.contains('dequeue')) {
       return Icons.remove_circle_outline;
-    if (lower.contains('traverse') || lower.contains('visit'))
+    }
+    if (lower.contains('traverse') || lower.contains('visit')) {
       return Icons.list_alt;
+    }
     if (lower.contains('found')) return Icons.check_circle_outline;
     if (lower.contains('not found')) return Icons.cancel_outlined;
     if (lower.contains('compare')) return Icons.compare_arrows;
@@ -264,14 +267,17 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
     if (lower.contains('search')) return 'Search';
     if (lower.contains('insert') ||
         lower.contains('push') ||
-        lower.contains('enqueue'))
+        lower.contains('enqueue')) {
       return 'Insert';
+    }
     if (lower.contains('delete') ||
         lower.contains('pop') ||
-        lower.contains('dequeue'))
+        lower.contains('dequeue')) {
       return 'Delete';
-    if (lower.contains('traverse') || lower.contains('visit'))
+    }
+    if (lower.contains('traverse') || lower.contains('visit')) {
       return 'Traverse';
+    }
     if (lower.contains('found')) return 'Found';
     if (lower.contains('not found')) return 'Not Found';
     if (lower.contains('compare')) return 'Compare';
@@ -376,7 +382,7 @@ class _DataStructureScreenState extends ConsumerState<DataStructureScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Card(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

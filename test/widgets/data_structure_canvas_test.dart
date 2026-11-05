@@ -6,8 +6,6 @@ import 'package:data_structures/models/base_data_structure.dart';
 import 'package:data_structures/models/data_structure_info.dart';
 import 'package:data_structures/models/data_structure_node.dart';
 import 'package:data_structures/models/animation_step.dart';
-import 'package:data_structures/data_structures/array_data_structure.dart';
-import 'package:data_structures/utils/constants.dart';
 
 class MockDataStructure extends BaseDataStructure {
   final List<DataStructureNode> _nodes;
@@ -21,7 +19,6 @@ class MockDataStructure extends BaseDataStructure {
   @override
   int get currentStep => _currentStep;
 
-  @override
   void setCurrentStep(int step) {
     _currentStep = step;
   }
@@ -36,7 +33,6 @@ class MockDataStructure extends BaseDataStructure {
     // Mock implementation
   }
 
-  @override
   void generateNodes() {
     // Mock implementation
   }
@@ -66,7 +62,6 @@ class MockDataStructure extends BaseDataStructure {
     // Mock implementation
   }
 
-  @override
   void generateRandomData() {
     // Mock implementation
   }
@@ -226,10 +221,7 @@ void main() {
       });
 
       testWidgets('can update node value', (tester) async {
-        bool nodeUpdated = false;
-        VoidCallback? onNodeUpdated = () => nodeUpdated = true;
-
-        await tester.pumpWidget(createTestWidget(onNodeUpdated: onNodeUpdated));
+        await tester.pumpWidget(createTestWidget(onNodeUpdated: () {}));
         await tester.pumpAndSettle();
 
         // Tap on node to show dialog

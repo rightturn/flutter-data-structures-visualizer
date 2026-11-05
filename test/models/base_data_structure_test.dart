@@ -1,11 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:data_structures/models/base_data_structure.dart';
 import 'package:data_structures/models/animation_step.dart';
 import 'package:data_structures/models/data_structure_node.dart';
 
 // Mock implementation for testing
 class MockDataStructure extends BaseDataStructure {
+  /// Test-only access to the protected [setNodes].
+  void setNodesForTest(List<DataStructureNode> nodes) => setNodes(nodes);
+
   @override
   void insert(int value) {
     // Mock implementation
@@ -147,14 +149,14 @@ void main() {
           DataStructureNode(value: 2, position: const Offset(50, 0)),
         ];
 
-        dataStructure.setNodes(testNodes);
+        dataStructure.setNodesForTest(testNodes);
         expect(dataStructure.nodes.length, 2);
         expect(dataStructure.nodes[0].value, 1);
         expect(dataStructure.nodes[1].value, 2);
       });
 
       test('setNodes with empty list', () {
-        dataStructure.setNodes([]);
+        dataStructure.setNodesForTest([]);
         expect(dataStructure.nodes.isEmpty, true);
       });
 
@@ -203,7 +205,7 @@ void main() {
         final testNodes = [
           DataStructureNode(value: 1, position: const Offset(0, 0)),
         ];
-        dataStructure.setNodes(testNodes);
+        dataStructure.setNodesForTest(testNodes);
 
         dataStructure.resetToDefault();
         expect(dataStructure.nodes.length, 1);

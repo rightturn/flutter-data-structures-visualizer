@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:data_structures/services/animation_service.dart';
 import 'package:data_structures/models/base_data_structure.dart';
 import 'package:data_structures/models/animation_step.dart';
@@ -115,13 +114,11 @@ void main() {
 
     group('Animation Callbacks', () {
       test('callbacks are called correctly', () {
-        bool onStepChangedCalled = false;
-        bool onAnimationCompleteCalled = false;
         bool onAnimationStateChangedCalled = false;
 
         final serviceWithCallbacks = AnimationService(
-          onStepChanged: () => onStepChangedCalled = true,
-          onAnimationComplete: () => onAnimationCompleteCalled = true,
+          onStepChanged: () {},
+          onAnimationComplete: () {},
           onAnimationStateChanged: () => onAnimationStateChangedCalled = true,
         );
 

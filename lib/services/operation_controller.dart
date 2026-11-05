@@ -238,13 +238,7 @@ class OperationResult {
     this.data,
   });
 
-  OperationResult.success(String message, {dynamic data})
-    : isSuccess = true,
-      message = message,
-      data = data;
+  OperationResult.success(this.message, {this.data}) : isSuccess = true;
 
-  OperationResult.error(String message)
-    : isSuccess = false,
-      message = message,
-      data = null;
+  OperationResult.error(this.message) : isSuccess = false, data = null;
 }

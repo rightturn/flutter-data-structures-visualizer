@@ -32,7 +32,7 @@ class StackDataStructure extends BaseDataStructure {
       }
 
       clearAnimationSteps();
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Step 1: Show current stack state
       addAnimationStep(
@@ -120,7 +120,7 @@ class StackDataStructure extends BaseDataStructure {
     AppLogger.dataStructure('StackDataStructure.pop called');
 
     try {
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Validate stack state
       final validation = ValidationService.validateDataStructureState(
@@ -214,7 +214,7 @@ class StackDataStructure extends BaseDataStructure {
     AppLogger.dataStructure('StackDataStructure.peek called');
 
     try {
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Validate stack state
       final validation = ValidationService.validateDataStructureState(
@@ -284,7 +284,7 @@ class StackDataStructure extends BaseDataStructure {
     AppLogger.dataStructure('StackDataStructure.traverse called');
 
     try {
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Validate stack state
       final validation = ValidationService.validateDataStructureState(

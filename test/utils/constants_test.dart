@@ -250,7 +250,6 @@ void main() {
 
     group('Integration Tests', () {
       test('node positioning calculations work correctly', () {
-        final nodeWidth = AppConstants.nodeBoxWidth;
         final nodeHeight = AppConstants.nodeBoxHeight;
         final spacing = AppConstants.nodeSpacing;
         final startY = AppConstants.nodeStartY;

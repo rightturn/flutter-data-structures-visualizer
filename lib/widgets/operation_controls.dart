@@ -164,7 +164,7 @@ class _OperationControlsState extends State<OperationControls> {
                           }
                         },
                       );
-                    }).toList(),
+                    }),
                     // Generate random data for linked list
                     ActionChip(
                       label: const Text('Generate Random Data'),
@@ -284,7 +284,7 @@ class _OperationControlsState extends State<OperationControls> {
                           }
                         },
                       );
-                    }).toList(),
+                    }),
                     // Generate random data for queue
                     ActionChip(
                       label: const Text('Generate Random Data'),
@@ -399,7 +399,7 @@ class _OperationControlsState extends State<OperationControls> {
                           }
                         },
                       );
-                    }).toList(),
+                    }),
                     // Generate random data for stack
                     ActionChip(
                       label: const Text('Generate Random Data'),
@@ -537,7 +537,7 @@ class _OperationControlsState extends State<OperationControls> {
                           }
                         },
                       );
-                    }).toList(),
+                    }),
                     // Generate random data for array
                     ActionChip(
                       label: const Text('Generate Random Data'),
@@ -821,7 +821,7 @@ class _OperationControlsState extends State<OperationControls> {
                 from: from,
                 to: to,
               );
-              if (!mounted) return;
+              if (!mounted || !context.mounted) return;
               Navigator.of(context).pop();
               if (!result.isSuccess) {
                 _showErrorMessage(result.message);
