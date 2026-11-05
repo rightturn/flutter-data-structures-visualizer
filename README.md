@@ -110,10 +110,10 @@ Screenshots are not yet included. Run the application locally to explore the int
 ### Quick Start
 ```bash
 # Clone the repository
-git clone git@github.com:rightturn/flutter-ds-visualizer.git
+git clone git@github.com:rightturn/flutter-data-structures-visualizer.git
 
 # Navigate to project directory
-cd flutter-ds-visualizer
+cd flutter-data-structures-visualizer
 
 # Install dependencies
 flutter pub get
@@ -212,6 +212,23 @@ lib/
 
 ---
 
+## 👥 Credits
+
+This app was built by two developers:
+
+- **Amna Sherazi**: original author. She created the project in July 2025 and wrote the initial
+  implementation of the array, stack and queue visualizations, the first tests and the app structure
+  (8 of the project's 9 commits, roughly two thirds of the Dart code at the time of this release).
+- **Nadeem Abbas Shah**: co-author. In October 2026 he reworked and extended the visualizations
+  (arrays, trees and graphs), expanded the test coverage and added the CI workflow and license
+  (roughly one third of the Dart code).
+
+The full commit history is preserved in this repository. Personal e-mail addresses in the history were
+replaced with placeholders, so GitHub does not link Amna's commits to her profile; her name remains on every
+commit she made.
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions! Here's how you can help:
@@ -266,7 +283,7 @@ If this project helped you learn data structures, please consider:
 
 **Have questions or suggestions?**
 
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/rightturn/flutter-ds-visualizer/issues)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/rightturn/flutter-data-structures-visualizer/issues)
 
 </div>
 
