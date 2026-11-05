@@ -323,8 +323,9 @@ class LearningPanel extends StatelessWidget {
 
     final description = dataStructure.animationSteps[currentStep].description;
     if (description.contains('Linear Search')) return 'Linear Search';
-    if (description.contains('Sequential Traversal'))
+    if (description.contains('Sequential Traversal')) {
       return 'Sequential Traversal';
+    }
     if (description.contains('Binary Search')) return 'Binary Search';
     if (description.contains('Depth-First')) return 'DFS';
     if (description.contains('Breadth-First')) return 'BFS';

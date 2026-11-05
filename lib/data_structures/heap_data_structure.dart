@@ -138,10 +138,12 @@ abstract class HeapDataStructure extends BaseDataStructure {
       final left = index * 2 + 1;
       final right = index * 2 + 2;
       var candidate = index;
-      if (left < values.length && !_ordered(values[candidate], values[left]))
+      if (left < values.length && !_ordered(values[candidate], values[left])) {
         candidate = left;
-      if (right < values.length && !_ordered(values[candidate], values[right]))
+      }
+      if (right < values.length && !_ordered(values[candidate], values[right])) {
         candidate = right;
+      }
       if (candidate == index) break;
       final value = values[index];
       values[index] = values[candidate];

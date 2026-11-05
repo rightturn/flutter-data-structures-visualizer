@@ -23,7 +23,6 @@ class MockDataStructure extends BaseDataStructure {
   @override
   List<AnimationStep> get animationSteps => _animationSteps;
 
-  @override
   void setCurrentStep(int step) {
     _currentStep = step;
   }
@@ -38,7 +37,6 @@ class MockDataStructure extends BaseDataStructure {
     _animationSteps.clear();
   }
 
-  @override
   void generateNodes() {
     // Mock implementation
   }
@@ -68,7 +66,6 @@ class MockDataStructure extends BaseDataStructure {
     // Mock implementation
   }
 
-  @override
   void generateRandomData() {
     // Mock implementation
   }
@@ -95,7 +92,6 @@ class MockArrayDataStructure extends ArrayDataStructure {
   @override
   List<AnimationStep> get animationSteps => _animationSteps;
 
-  @override
   void setCurrentStep(int step) {
     _currentStep = step;
   }
@@ -110,7 +106,6 @@ class MockArrayDataStructure extends ArrayDataStructure {
     _animationSteps.clear();
   }
 
-  @override
   void generateNodes() {
     // Mock implementation
   }
@@ -140,7 +135,6 @@ class MockArrayDataStructure extends ArrayDataStructure {
     // Mock implementation
   }
 
-  @override
   void generateRandomData() {
     // Mock implementation
   }

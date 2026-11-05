@@ -16,7 +16,6 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      # Reports analyzer findings without failing the build; the cleanup backlog is tracked in the issues.
-      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter analyze
       - run: flutter test
       - run: flutter build web --release

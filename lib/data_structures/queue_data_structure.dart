@@ -48,7 +48,7 @@ class QueueDataStructure extends BaseDataStructure {
       }
 
       clearAnimationSteps();
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Step 1: Show current queue state
       addAnimationStep(
@@ -121,7 +121,7 @@ class QueueDataStructure extends BaseDataStructure {
     AppLogger.dataStructure('QueueDataStructure.dequeue called');
 
     try {
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Validate queue state
       final validation = ValidationService.validateDataStructureState(
@@ -203,7 +203,7 @@ class QueueDataStructure extends BaseDataStructure {
     AppLogger.dataStructure('QueueDataStructure.front called');
 
     try {
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Validate queue state
       final validation = ValidationService.validateDataStructureState(
@@ -268,7 +268,7 @@ class QueueDataStructure extends BaseDataStructure {
     AppLogger.dataStructure('QueueDataStructure.traverse called');
 
     try {
-      final currentNodes = List<DataStructureNode>.from(this.nodes);
+      final currentNodes = List<DataStructureNode>.from(nodes);
 
       // Validate queue state
       final validation = ValidationService.validateDataStructureState(

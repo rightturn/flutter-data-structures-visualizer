@@ -24,8 +24,9 @@ class NodeEditValidator {
     if (input.isEmpty) return 'Value cannot be empty';
     final value = int.tryParse(input);
     if (value == null) return 'Please enter a valid number';
-    if (value < -999 || value > 999)
+    if (value < -999 || value > 999) {
       return 'Value must be between -999 and 999';
+    }
     return null;
   }
 }
@@ -250,7 +251,7 @@ abstract class DataStructureRenderer {
   }) {
     final actualIndex = displayIndex ?? index;
 
-    return Container(
+    return SizedBox(
       width:
           AppConstants.nodeBoxWidth +
           CanvasConstants.indexWidth +
@@ -590,10 +591,10 @@ class QueueRenderer extends DataStructureRenderer {
   }
 
   @override
-  double calculateTotalHeight(int nodeCount) {
-    if (nodeCount == 0) return AppConstants.minCanvasHeight;
-    return (nodeCount * AppConstants.nodeBoxHeight +
-            (nodeCount - 1) * CanvasConstants.nodeSpacing +
+  double calculateTotalHeight(int itemCount) {
+    if (itemCount == 0) return AppConstants.minCanvasHeight;
+    return (itemCount * AppConstants.nodeBoxHeight +
+            (itemCount - 1) * CanvasConstants.nodeSpacing +
             2 * AppConstants.nodeStartY +
             100) // Extra space for indicators
         .clamp(AppConstants.minCanvasHeight, double.infinity);
@@ -602,16 +603,16 @@ class QueueRenderer extends DataStructureRenderer {
   @override
   double calculateScrollPosition(
     int nodeIndex,
-    double viewportDimension,
-    double maxScrollExtent,
+    double viewportHeight,
+    double maxScroll,
   ) {
     final nodeY =
         AppConstants.nodeStartY +
         nodeIndex * (AppConstants.nodeBoxHeight + CanvasConstants.nodeSpacing);
     final nodeBottom = nodeY + AppConstants.nodeBoxHeight;
     final targetScroll =
-        nodeBottom - (viewportDimension * AppConstants.scrollTargetRatio);
-    return targetScroll.clamp(0.0, maxScrollExtent);
+        nodeBottom - (viewportHeight * AppConstants.scrollTargetRatio);
+    return targetScroll.clamp(0.0, maxScroll);
   }
 }
 
@@ -704,8 +705,9 @@ class StructureConnectionPainter extends CustomPainter {
       for (final edge in graphEdges) {
         final from = byValue[edge.$1];
         final to = byValue[edge.$2];
-        if (from != null && to != null)
+        if (from != null && to != null) {
           canvas.drawLine(from.position, to.position, paint);
+        }
       }
       return;
     }
@@ -717,8 +719,9 @@ class StructureConnectionPainter extends CustomPainter {
     for (final entry in byIndex.entries) {
       if (entry.key == 0) continue;
       final parent = byIndex[(entry.key - 1) ~/ 2];
-      if (parent != null)
+      if (parent != null) {
         canvas.drawLine(parent.position, entry.value.position, paint);
+      }
     }
   }
 

@@ -22,7 +22,6 @@ class MockDataStructure extends BaseDataStructure {
   @override
   List<AnimationStep> get animationSteps => _animationSteps;
 
-  @override
   void setCurrentStep(int step) {
     _currentStep = step;
     // Trigger rebuild by calling notifyListeners if this were a ChangeNotifier
@@ -38,7 +37,6 @@ class MockDataStructure extends BaseDataStructure {
     // Mock implementation
   }
 
-  @override
   void generateNodes() {
     // Mock implementation
   }
@@ -68,7 +66,6 @@ class MockDataStructure extends BaseDataStructure {
     // Mock implementation
   }
 
-  @override
   void generateRandomData() {
     // Mock implementation
   }
